@@ -38,7 +38,7 @@ Notes:
 ## Usage
 
 - **Tap a song tile:** starts the song and turns the microphone on.
-- **🎤** microphone on/off · **🔔** play the current note · **🔁 Von vorn** restart the song · **🏠** back to the song list.
+- **🎤** microphone on/off · **🔊** play the current note · **🔁 Von vorn** restart the song · **🏠** back to the song list.
 - Tap the big circle to move to the next note without the microphone.
 - **Parent area:** press and hold the ⚙️ in the top-right corner for about 1 second. It contains: autoplay, read the color aloud, microphone sensitivity, one note back, calibration, and clearing saved data.
 
@@ -64,6 +64,10 @@ Format: `syllable|note`, where notes are `C D E F G A H c` (`c` = high C). Use `
 Files: `manifest.webmanifest`, `sw.js`, `icons/`.
 
 After changing `index.html`, the icons or the manifest, bump the version in `sw.js` (`const VERSION = "glock-v2"` → `glock-v3`) so installed apps discard the old cache.
+
+## License
+
+The code is released under [MIT-0](LICENSE.md) (MIT No Attribution). The songs are traditional or public-domain melodies; only the melody and the first verse are included.
 
 ## Publishing
 
