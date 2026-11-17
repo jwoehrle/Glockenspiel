@@ -1,5 +1,5 @@
 // Bei jeder Änderung an index.html/Icons die Version erhöhen, damit die App aktualisiert wird.
-const VERSION = "glock-v1";
+const VERSION = "glock-v2";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

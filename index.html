@@ -290,7 +290,7 @@ async function startMic(){
     const a=audio();
     stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
     const src=a.createMediaStreamSource(stream);
-    analyser=a.createAnalyser(); analyser.fftSize=8192; analyser.smoothingTimeConstant=0;
+    analyser=a.createAnalyser(); analyser.fftSize=4096; analyser.smoothingTimeConstant=0;
     src.connect(analyser);
     listening=true; $("mic").className="listening";
     $("meter").style.display="block";
@@ -311,17 +311,20 @@ function stopMic(){
   $("meter").style.display="none"; $("hint").textContent="";
 }
 
-let avg=0.002, lastHit=0, pending=0;
+// Einsatz-Erkennung: kurzes Fenster (letzte 512 Samples ≈ 10 ms) und Anstieg gegenüber dem
+// vorigen Frame. Nachklingende Töne werden nur leiser, ein neuer Anschlag ist immer ein Sprung nach oben.
+let lastHit=0, pending=0, prevRms=0, tdBuf=null;
 function loop(){
   raf=requestAnimationFrame(loop);
-  const td=new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(td);
-  let s=0; for(let i=0;i<td.length;i+=4) s+=td[i]*td[i]; const rms=Math.sqrt(s/(td.length/4));
+  if(!tdBuf || tdBuf.length!==analyser.fftSize) tdBuf=new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(tdBuf);
+  const n=tdBuf.length, W=512; let s=0; for(let i=n-W;i<n;i++) s+=tdBuf[i]*tdBuf[i]; const rms=Math.sqrt(s/W);
   $("lvl").style.width=Math.min(100,rms*600)+"%";
   const now=performance.now(), sens=+$("sens").value;
   const minRms = 0.004 + (10-sens)*0.006;
-  if(!pending && now-lastHit>220 && rms>minRms && rms>avg*3){ pending=now; }
-  avg = avg*0.95 + rms*0.05;
-  if(pending && now-pending>45){ pending=0; lastHit=now; detect(); }
+  if(!pending && now-lastHit>150 && rms>minRms && rms>prevRms*1.5){ pending=now; }
+  prevRms=rms;
+  if(pending && now-pending>55){ pending=0; lastHit=now; detect(); }
 }
 function peakFreqs(){
   const a=audio(), sr=a.sampleRate, N=analyser.frequencyBinCount;
