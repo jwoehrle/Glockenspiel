@@ -1,70 +1,70 @@
 # Mein Glockenspiel
 
-Kleine Web-App zum Lernen von Liedern auf einem Glockenspiel (C–c, acht Klangstäbe).
-Die App zeigt die nächste Farbe/den nächsten Ton und hört per Mikrofon zu, ob der richtige Stab angeschlagen wurde.
+A small web app for learning songs on a glockenspiel (C–c, eight bars).
+It shows the next color/note and listens through the microphone to check whether the right bar was struck.
 
 - Live: https://jwoehrle.github.io/Glockenspiel/
-- Eine einzige Seite (`index.html`), kein Build-Schritt, keine Abhängigkeiten.
-- Als App installierbar (PWA) und offline nutzbar.
+- A single page (`index.html`), no build step, no dependencies.
+- Installable as an app (PWA) and usable offline.
 
-## Lokal testen
+## Testing locally
 
-Voraussetzung: Python 3 (auf den meisten Systemen vorhanden).
+Requirement: Python 3 (available on most systems).
 
 ```bash
 cd glockenspiel
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Dann im Browser (Chrome empfohlen) öffnen: <http://localhost:8000>
+Then open in your browser (Chrome recommended): <http://localhost:8000>
 
-Beenden mit `Strg+C`.
+Stop with `Ctrl+C`.
 
-Hinweise:
+Notes:
 
-- **Mikrofon:** funktioniert nur in einem sicheren Kontext. `localhost` zählt dazu, ein Doppelklick auf `index.html` (`file://`) nicht zuverlässig. Beim ersten Antippen eines Lieds fragt der Browser nach der Mikrofon-Erlaubnis.
-- **Änderungen sehen:** normal neu laden (Strg+R). Der Service Worker lädt zuerst die neueste Version aus dem Netz. Wenn doch etwas hängt: Strg+Shift+R, oder in den DevTools unter *Application → Service Workers* „Update on reload“ aktivieren bzw. „Unregister“ klicken.
-- **Einstellungen sind pro Adresse getrennt:** `localhost:8000` und die Live-Seite haben jeweils eigene Kalibrierung und Optionen (gespeichert im `localStorage`).
+- **Microphone:** only works in a secure context. `localhost` counts as one; double-clicking `index.html` (`file://`) is unreliable. The browser asks for microphone permission the first time you tap a song.
+- **Seeing changes:** reload normally (Ctrl+R). The service worker fetches the newest version from the network first. If something sticks, use Ctrl+Shift+R, or in DevTools under *Application → Service Workers* enable "Update on reload" or click "Unregister".
+- **Settings are separate per address:** `localhost:8000` and the live site each have their own calibration and options (stored in `localStorage`).
 
-### Auf dem Handy testen
+### Testing on a phone
 
-`http://<laptop-ip>:8000` hat auf dem Handy kein Mikrofon (kein HTTPS). Stattdessen per Chrome-Portweiterleitung:
+`http://<laptop-ip>:8000` has no microphone on the phone (no HTTPS). Use Chrome port forwarding instead:
 
-1. Handy per USB anschließen, auf dem Handy USB-Debugging aktivieren.
-2. Auf dem Laptop `chrome://inspect/#devices` öffnen.
-3. Bei *Port forwarding* `8000` → `localhost:8000` eintragen und aktivieren.
-4. Auf dem Handy in Chrome `http://localhost:8000` öffnen.
+1. Connect the phone via USB and enable USB debugging on it.
+2. On the laptop, open `chrome://inspect/#devices`.
+3. Under *Port forwarding*, add `8000` → `localhost:8000` and enable it.
+4. On the phone, open `http://localhost:8000` in Chrome.
 
-## Bedienung
+## Usage
 
-- **Liedkachel antippen:** startet das Lied und schaltet das Mikrofon ein.
-- **🎤** Mikrofon an/aus · **🔔** aktuellen Ton vorspielen · **🔁 Von vorn** Lied neu starten · **🏠** zurück zur Liedauswahl.
-- Großen Kreis antippen = ohne Mikrofon zum nächsten Ton.
-- **Eltern-Bereich:** das ⚙️ oben rechts ca. 1 Sekunde gedrückt halten. Dort: automatisches Vorspielen, Farbe vorlesen, Mikrofon-Empfindlichkeit, einen Ton zurück, Kalibrierung, gespeicherte Daten löschen.
+- **Tap a song tile:** starts the song and turns the microphone on.
+- **🎤** microphone on/off · **🔔** play the current note · **🔁 Von vorn** restart the song · **🏠** back to the song list.
+- Tap the big circle to move to the next note without the microphone.
+- **Parent area:** press and hold the ⚙️ in the top-right corner for about 1 second. It contains: autoplay, read the color aloud, microphone sensitivity, one note back, calibration, and clearing saved data.
 
-### Kalibrierung (optional)
+### Calibration (optional)
 
-Im Eltern-Bereich auf *Kalibrieren* tippen und nacheinander die acht Stäbe einzeln anschlagen. Die App merkt sich die gemessenen Frequenzen und prüft danach gegen diese (±50 Cent) statt gegen die Standardstimmung. Bei einem normal gestimmten Glockenspiel ist das nicht nötig.
+In the parent area, tap *Kalibrieren* and strike the eight bars one at a time. The app stores the measured frequencies and then checks against those (±50 cents) instead of standard tuning. For a normally tuned glockenspiel this isn't needed.
 
-## Lieder hinzufügen
+## Adding songs
 
-In `index.html` im Objekt `SONGS` einen Eintrag ergänzen:
+Add an entry to the `SONGS` object in `index.html`:
 
 ```js
-meinlied: {icon:"🎵", title:"Titel", notes: build([
-  "Zei-|C le|D eins|E",
-  "Zei-|F le|G zwei|AB"   // zwei Buchstaben = zwei Töne auf einer Silbe
+meinlied: {icon:"🎵", title:"Title", notes: build([
+  "Line-|C one|D here|E",
+  "Line-|F two|G now|AB"   // two letters = two notes on one syllable
 ])}
 ```
 
-Format: `Silbe|Ton`, Töne sind `C D E F G A H c` (`c` = hohes C). Leerzeichen in Silben als `_`. Nur Töne aus dem Bereich C–c verwenden; tiefere/höhere Töne müssen transponiert oder eine Oktave verlegt werden.
+Format: `syllable|note`, where notes are `C D E F G A H c` (`c` = high C). Use `_` for a space inside a syllable. Only use notes within the C–c range; lower or higher notes have to be transposed or moved by an octave.
 
-## PWA / Updates
+## PWA / updates
 
-Dateien: `manifest.webmanifest`, `sw.js`, `icons/`.
+Files: `manifest.webmanifest`, `sw.js`, `icons/`.
 
-Nach Änderungen an `index.html`, den Icons oder dem Manifest die Version in `sw.js` erhöhen (`const VERSION = "glock-v2"` → `glock-v3`), damit installierte Apps den alten Cache verwerfen.
+After changing `index.html`, the icons or the manifest, bump the version in `sw.js` (`const VERSION = "glock-v2"` → `glock-v3`) so installed apps discard the old cache.
 
-## Veröffentlichen
+## Publishing
 
-Die Seite wird über GitHub Pages aus dem Branch `main` (Ordner `/`) ausgeliefert. Ein `git push` auf `main` genügt; das Update ist nach ein bis zwei Minuten online.
+The site is served by GitHub Pages from the `main` branch (folder `/`). A `git push` to `main` is enough; the update is live after a minute or two.
