@@ -10,9 +10,16 @@
   body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
        min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 12px 32px}
   h1{font-size:20px;margin:4px 0 12px;letter-spacing:.2px}
-  .songs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
-  .songs button{border:2px solid #E3D9CC;background:var(--card);border-radius:999px;padding:9px 16px;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer}
-  .songs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  body.home .stage, body.home .track, body.home .controls, body.home .meter{display:none!important}
+  body.play .songs{display:none}
+  body.home h1{font-size:28px;margin:28px 0 18px}
+  .songs{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;max-width:640px}
+  .songs button{border:3px solid #E3D9CC;background:var(--card);border-radius:24px;padding:14px 10px;width:140px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.08)}
+  .songs button:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.08)}
+  .songs .ic{font-size:64px;line-height:1.1}
+  .songs .tt{font-size:14px;line-height:1.2}
+  .gear{position:fixed;top:6px;right:6px;width:36px;height:36px;border:none;border-radius:50%;background:transparent;font-size:18px;opacity:.3;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .8s,opacity .8s}
+  .gear.hold{transform:rotate(180deg) scale(1.3);opacity:.9}
   .stage{position:relative;width:min(92vw,420px);display:flex;flex-direction:column;align-items:center}
   .big{width:min(60vw,240px);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;
        font-size:min(22vw,92px);font-weight:800;color:#fff;cursor:pointer;user-select:none;
@@ -22,7 +29,14 @@
   .big.hit{animation:pop .35s}
   .big.miss{animation:shake .4s}
   @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
-  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-14px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(5px)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+  @keyframes fly{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.2);opacity:0}}
+  @keyframes pulse{50%{box-shadow:0 0 0 10px rgba(180,80,75,.25)}}
+  .sparks{position:absolute;left:50%;top:min(30vw,120px);width:0;height:0;pointer-events:none;z-index:5}
+  .sparks span{position:absolute;margin:-13px 0 0 -13px;font-size:26px;animation:fly .85s ease-out forwards}
+  .next{display:flex;align-items:center;gap:8px;min-height:44px;margin-top:6px;font-size:13px;color:var(--muted)}
+  .next .nd{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;opacity:.55}
+  .calcancel{display:none;margin-top:8px;border:none;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;background:#F2B63C;color:var(--ink);cursor:pointer}
   .colname{margin-top:18px;font-size:22px;font-weight:700}
   .syl{font-size:28px;font-weight:800;margin-top:4px;min-height:36px}
   .hint{font-size:14px;color:var(--muted);min-height:20px;margin-top:4px;text-align:center}
@@ -33,15 +47,18 @@
   .dot.done{opacity:.25}
   .dot.cur{opacity:1}
   .dot.cur .c{outline:3px solid var(--ink);outline-offset:3px}
-  .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-  .controls button{border:none;border-radius:14px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer;background:#EDE4D8;color:var(--ink)}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:16px}
+  .controls button{border:none;border-radius:22px;width:76px;height:76px;padding:0;font-size:36px;cursor:pointer;background:#EDE4D8;color:var(--ink);box-shadow:0 5px 0 rgba(0,0,0,.1)}
+  .controls button:active{transform:translateY(3px)}
+  .controls button.restart{width:auto;min-width:150px;padding:0 22px;font-size:22px;font-weight:800;background:#F2B63C;box-shadow:0 5px 0 rgba(0,0,0,.15)}
   .controls button.primary{background:#2B9BD9;color:#fff}
-  .controls button.listening{background:#B4504B;color:#fff}
+  .controls button.listening{background:#B4504B;color:#fff;animation:pulse 1.4s infinite}
   .controls button.calon{background:#F2B63C;color:#2B2522}
   .meter{width:min(70vw,260px);height:8px;background:#EDE4D8;border-radius:4px;margin-top:12px;overflow:hidden;display:none}
   .meter i{display:block;height:100%;width:0;background:#3F6B47;transition:width .05s}
   .done-box{display:none;flex-direction:column;align-items:center;margin-top:10px}
   .done-box .yay{font-size:56px}
+  .done-box .again{border:none;border-radius:20px;background:#F2B63C;color:var(--ink);font-size:26px;font-weight:800;padding:18px 32px;margin-top:10px;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.15)}
   .done-box p{font-size:22px;font-weight:800;margin:6px 0}
   .sens{display:none;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:8px}
   dialog{border:none;border-radius:18px;padding:20px;max-width:min(92vw,360px);background:var(--card);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.3)}
@@ -50,45 +67,54 @@
   dialog button{display:block;width:100%;margin-top:8px;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;background:#EDE4D8;color:var(--ink)}
   dialog button.primary{background:#2B9BD9;color:#fff;margin-top:14px}
   dialog button:disabled{opacity:.4;cursor:default}
+  dialog .opt{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:15px}
+  dialog .opt input[type=checkbox]{width:20px;height:20px}
+  dialog .opt input[type=range]{flex:1}
   dialog .st{font-size:13px;color:var(--muted);margin:4px 0;min-height:18px}
-  footer{margin-top:22px;font-size:12px;color:var(--muted);text-align:center;max-width:420px;line-height:1.4}
+  footer{display:none;margin-top:22px;font-size:12px;color:var(--muted);text-align:center;max-width:420px;line-height:1.4}
 </style>
 </head>
 <body>
-<h1>🎵 Mein Glockenspiel</h1>
+<button class="gear" id="settingsBtn" title="Eltern-Bereich (gedrückt halten)" aria-label="Eltern-Bereich">⚙️</button>
+<h1 id="title">🎵 Mein Glockenspiel</h1>
 <div class="songs" id="songs"></div>
 
 <div class="stage">
   <div class="big" id="big" title="Antippen = weiter"></div>
   <div class="colname" id="colname"></div>
   <div class="syl" id="syl"></div>
+  <div class="next" id="next"></div>
   <div class="hint" id="hint"></div>
-  <div class="done-box" id="done"><div class="yay">🎉⭐🎉</div><p>Super gemacht!</p></div>
+  <button class="calcancel" id="calcancel">✖ Kalibrierung abbrechen</button>
+  <div class="sparks" id="sparks"></div>
+  <div class="done-box" id="done"><div class="yay">🎉⭐🎉</div><p>Super gemacht!</p><button id="again" class="again">🔁 Nochmal!</button></div>
 </div>
 
 <div class="track" id="track"></div>
 
 <div class="controls">
-  <button id="mic" class="primary">🎤 Zuhören</button>
-  <button id="play">🔔 Vorspielen</button>
-  <button id="back">⬅️ Zurück</button>
-  <button id="restart">🔁 Von vorn</button>
-  <button id="cal">🎯 Kalibrieren</button>
-  <button id="settingsBtn" title="Einstellungen">⚙️</button>
+  <button id="home" title="Lieder" aria-label="Lieder">🏠</button>
+  <button id="mic" class="primary" title="Zuhören" aria-label="Zuhören">🎤</button>
+  <button id="play" title="Vorspielen" aria-label="Vorspielen">🔔</button>
+  <button id="restart" class="restart">🔁 Von vorn</button>
 </div>
+<div class="meter" id="meter"><i id="lvl"></i></div>
 
 <dialog id="settings">
-  <h2>⚙️ Einstellungen</h2>
+  <h2>⚙️ Eltern-Bereich</h2>
+  <label class="opt"><input type="checkbox" id="optAuto"> Ton automatisch vorspielen</label>
+  <label class="opt"><input type="checkbox" id="optSpeak"> Farbe vorlesen</label>
+  <label class="opt">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6"></label>
+  <button id="back">⬅️ Einen Ton zurück</button>
+  <button id="cal">🎯 Kalibrieren</button>
   <p class="st" id="calState"></p>
   <button id="calreset">🗑 Kalibrierung löschen</button>
   <button id="clearall">🧹 Alle gespeicherten Daten löschen</button>
   <p class="st" id="setMsg"></p>
   <button id="setClose" class="primary">Schließen</button>
 </dialog>
-<div class="meter" id="meter"><i id="lvl"></i></div>
-<label class="sens" id="sensWrap">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6"></label>
 
-<footer id="foot">Großen Kreis antippen = nächster Ton. „Vorspielen“ zeigt, wie der Ton klingt.</footer>
+<footer id="foot"></footer>
 
 <script>
 const COL = {
@@ -110,13 +136,13 @@ function build(lines){
   return out;
 }
 const SONGS = {
-  froh: {title:"Lasst uns froh und munter sein", notes: build([
+  froh: {icon:"🎅",title:"Lasst uns froh und munter sein", notes: build([
     "Lasst|G uns|G froh|GA und|GF mun-|E ter|E sein,|E",
     "und|F uns|F recht|FG von|FE Her-|D zen|D freun!|D",
     "Lus-|C tig,|D lus-|E tig,|F tra-le-|GA ra-le-|GA ra,|G",
     "bald|c ist|G Ni-|GA ko-|GF laus-|E a-bend|D da,|G",
     "bald|c ist|G Ni-|GA ko-|GF laus-|E a-bend|D da!|C"])},
-  jingle: {title:"Jingle Bells", notes: build([
+  jingle: {icon:"🔔",title:"Jingle Bells", notes: build([
     "Jin-|E gle|E bells,|E jin-|E gle|E bells,|E",
     "jin-|E gle|G all|C the|D way!|E",
     "Oh|F what|F fun|F it|F is|F to|E ride|E in|E a|E",
@@ -125,13 +151,18 @@ const SONGS = {
     "jin-|E gle|G all|C the|D way!|E",
     "Oh|F what|F fun|F it|F is|F to|E ride|E in|E a|E",
     "one-|G horse|G o-|F pen|D sleigh!|C"])},
-  weihnachtsmann: {title:"Morgen kommt der Weihnachtsmann", notes: build([
+  weihnachtsmann: {icon:"🎁",title:"Morgen kommt der Weihnachtsmann", notes: build([
     "Mor-|C gen|C kommt|G der|G Weih-|A nachts-|A mann,|G",
     "kommt|F mit|F sei-|E nen|E Ga-|DD ben.|C",
     "Trom-|G mel,|G Pfei-|F fe|F und|E Ge-|E wehr,|D",
     "Fahn|G und|G Sä-|F bel|F und|E noch|E mehr,|D",
     "ja|C ein|C gan-|G zes|G Krie-|A ges-|A heer,|G",
-    "möcht|F ich|F ger-|E ne|E ha-|DD ben.|C"])}
+    "möcht|F ich|F ger-|E ne|E ha-|DD ben.|C"])},
+  // Original in F-Dur (Ambitus C4–D5); nach C-Dur transponiert. Die tiefen Töne (G unter C, H unter C) sind eine Oktave höher gelegt.
+  martin: {icon:"🏮",title:"Sankt Martin (in C, vereinfacht)", notes: build([
+    "Sankt|G Mar-|C tin,|G Sankt|CD Mar-|E tin,|C Sankt|EF Mar-|G tin|E ritt|F durch|A",
+    "Schnee|G und|GF Wind,|E sein|G Ross,|F das|F trug|D ihn|G fort|E ge-|ED schwind.|C",
+    "Sankt|G Mar-|C tin|E ritt|E mit|DC leich-|D tem|F Mut,|F sein|ED Man-|E tel|G deckt'|E ihn|C warm|ED und|DH gut.|C"])}
 };
 
 const ORDER=["C","D","E","F","G","A","H","c"];
@@ -139,13 +170,19 @@ let songKey="froh", idx=0, ctx=null, calIdx=-1, calTmp={}, cal=loadCal();
 function loadCal(){ try{ const o=JSON.parse(localStorage.getItem("glock-cal")||"null"); if(o && ORDER.every(n=>o[n]>400)) return o; }catch(e){} return null; }
 function saveCal(){ try{ if(cal) localStorage.setItem("glock-cal",JSON.stringify(cal)); else localStorage.removeItem("glock-cal"); }catch(e){} }
 const $=id=>document.getElementById(id);
+const OPT_DEF={auto:false,speak:false};
+function loadOpts(){ try{ return {...OPT_DEF,...JSON.parse(localStorage.getItem("glock-opts")||"{}")}; }catch(e){ return {...OPT_DEF}; } }
+function saveOpts(){ try{ localStorage.setItem("glock-opts",JSON.stringify(opts)); }catch(e){} }
+let opts=loadOpts(), mode="home", announceT=0, annId=0;
+function setMode(m){ mode=m; document.body.className=m; const s=SONGS[songKey]; $("title").textContent = m==="home" ? "🎵 Mein Glockenspiel" : s.icon+" "+s.title; }
 
 function renderSongs(){
   $("songs").innerHTML="";
   for(const k in SONGS){
     const b=document.createElement("button");
-    b.textContent=SONGS[k].title; if(k===songKey) b.className="on";
-    b.onclick=()=>{songKey=k; idx=0; renderSongs(); renderTrack(); show();};
+    b.innerHTML=`<span class="ic">${SONGS[k].icon}</span><span class="tt">${SONGS[k].title}</span>`; b.title=SONGS[k].title;
+    b.onclick=()=>{ songKey=k; idx=0; setMode("play"); renderTrack(); show();
+      if(canMic && !micFailed && !listening) startMic().then(()=>announce()); else announce(); };
     $("songs").appendChild(b);
   }
 }
@@ -155,7 +192,7 @@ function renderTrack(){
     const d=document.createElement("div"); d.className="dot";
     if(i>0 && x.line!==SONGS[songKey].notes[i-1].line) d.style.marginLeft="14px";
     d.innerHTML=`<div class="c" style="background:${COL[x.n].hex}">${x.n==="c"?"C*":x.n}</div><div class="t">${x.s}</div>`;
-    d.onclick=()=>{idx=i;show();};
+    d.onclick=()=>{idx=i;show();announce();};
     t.appendChild(d);
   });
 }
@@ -169,6 +206,7 @@ function show(){
     $("syl").textContent="Kalibrieren "+(calIdx+1)+"/"+ORDER.length;
     $("hint").textContent="Schlag diesen Stab einzeln an (Kreis antippen = überspringen)";
     [...$("track").children].forEach(d=>d.className="dot done");
+    $("next").innerHTML="";
     return;
   }
   const notes=SONGS[songKey].notes, done=idx>=notes.length;
@@ -177,18 +215,46 @@ function show(){
   $("colname").style.display=done?"none":"block";
   $("syl").style.display=done?"none":"block";
   [...$("track").children].forEach((d,i)=>d.className="dot"+(i<idx?" done":"")+(i===idx?" cur":""));
-  if(done){ $("hint").textContent=""; return; }
+  if(done){ $("hint").textContent=""; $("next").innerHTML=""; return; }
   const x=notes[idx], c=COL[x.n];
   $("big").style.background=c.hex;
   $("big").innerHTML=(x.n==="c"?"C":x.n)+(x.n==="c"?'<span class="star">★</span>':"");
   $("colname").textContent=c.name + (x.n==="C" && SONGS[songKey].notes.some(y=>y.n==="c") ? " links" : "");
   $("syl").textContent=x.s;
+  const nx=notes[idx+1];
+  $("next").innerHTML = nx ? `<span>danach</span><span class="nd" style="background:${COL[nx.n].hex}">${nx.n==="c"?"C":nx.n}</span>` : "";
   const cur=$("track").children[idx];
   if(cur){ const t=$("track"); t.scrollLeft = cur.offsetLeft - t.clientWidth/2 + 17; }
 }
-function next(){ const b=$("big"); b.classList.remove("hit"); void b.offsetWidth; b.classList.add("hit"); idx++; show(); }
-function miss(n){ const b=$("big"); b.classList.remove("miss"); void b.offsetWidth; b.classList.add("miss");
-  $("hint").textContent = "Das war "+COL[n].name+" – probier nochmal!"; clearTimeout(miss.t); miss.t=setTimeout(()=>$("hint").textContent="",1500); }
+function next(){ const b=$("big"); b.classList.remove("hit"); void b.offsetWidth; b.classList.add("hit"); sparkle(); idx++; show(); announce(); }
+// falscher Ton: nur ein sanftes Wackeln, kein Text, kein Ton
+function miss(n){ const b=$("big"); b.classList.remove("miss"); void b.offsetWidth; b.classList.add("miss"); }
+function sparkle(){
+  const box=$("sparks");
+  for(let i=0;i<8;i++){
+    const e=document.createElement("span"), a=(i/8)*2*Math.PI+Math.random()*.5, r=80+Math.random()*60;
+    e.textContent=["⭐","✨","🌟"][i%3];
+    e.style.setProperty("--dx",Math.cos(a)*r+"px"); e.style.setProperty("--dy",Math.sin(a)*r+"px");
+    box.appendChild(e); setTimeout(()=>e.remove(),900);
+  }
+}
+// Detektor kurz stummschalten, damit die App ihren eigenen Ton nicht "hört"
+function blockDetect(ms){ lastHit=performance.now()+ms; pending=0; }
+// neuen Ton ankündigen: optional Farbe vorlesen, optional Ton vorspielen
+function announce(){
+  const my=++annId; clearTimeout(announceT);
+  try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){}
+  if(mode!=="play" || calIdx>=0 || (!opts.auto && !opts.speak)) return;
+  const x=SONGS[songKey].notes[idx]; if(!x) return;
+  blockDetect(opts.speak?2500:1500);
+  const ring=()=>{ if(my===annId && opts.auto && mode==="play" && calIdx<0){ blockDetect(1500); bell(x.n); } };
+  if(opts.speak && "speechSynthesis" in window){
+    let fired=false; const go=()=>{ if(fired||my!==annId) return; fired=true; clearTimeout(announceT); ring(); };
+    const u=new SpeechSynthesisUtterance($("colname").textContent); u.lang="de-DE"; u.rate=.9; u.onend=go; u.onerror=go;
+    announceT=setTimeout(go,1800);
+    try{ speechSynthesis.speak(u); }catch(e){ go(); }
+  } else announceT=setTimeout(ring,300);
+}
 
 function audio(){ if(!ctx){ ctx=new (window.AudioContext||window.webkitAudioContext)(); } if(ctx.state==="suspended") ctx.resume(); return ctx; }
 function bell(n){
@@ -201,12 +267,13 @@ function bell(n){
 }
 
 $("big").onclick=()=>{ if(calIdx>=0) calAdvance(); else next(); };
-$("play").onclick=()=>{ const x=SONGS[songKey].notes[idx]; if(x) bell(x.n); };
-$("back").onclick=()=>{ idx=Math.max(0,idx-1); show(); };
-$("restart").onclick=()=>{ idx=0; show(); };
+$("play").onclick=()=>{ const x=SONGS[songKey].notes[idx]; if(x){ blockDetect(1800); bell(x.n); } };
+$("back").onclick=()=>{ $("settings").close(); idx=Math.max(0,idx-1); show(); announce(); };
+$("restart").onclick=$("again").onclick=()=>{ idx=0; show(); announce(); };
+$("home").onclick=()=>{ ++annId; clearTimeout(announceT); try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} if(listening) stopMic(); setMode("home"); };
 
 // ---------- Mikrofon ----------
-let listening=false, stream=null, analyser=null, raf=null;
+let listening=false, stream=null, analyser=null, raf=null, micFailed=false;
 const canMic = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 if(!canMic){ $("mic").style.display="none"; }
 
@@ -218,13 +285,13 @@ async function startMic(){
     const src=a.createMediaStreamSource(stream);
     analyser=a.createAnalyser(); analyser.fftSize=8192; analyser.smoothingTimeConstant=0;
     src.connect(analyser);
-    listening=true; $("mic").textContent="⏹ Zuhören aus"; $("mic").className="listening";
-    $("meter").style.display="block"; $("sensWrap").style.display="flex";
+    listening=true; $("mic").className="listening";
+    $("meter").style.display="block";
     $("hint").textContent="Ich höre zu – spiel den Ton!";
     loop();
     return true;
   }catch(e){
-    $("mic").style.display="none";
+    micFailed=true; $("mic").style.display="none"; $("foot").style.display="block";
     $("foot").innerHTML="Das Mikrofon ist hier nicht erlaubt. Öffne die HTML-Datei im Browser (z.&nbsp;B. Chrome), dann hört die App zu. Bis dahin: großen Kreis antippen.";
     return false;
   }
@@ -233,8 +300,8 @@ function stopMic(){
   if(calIdx>=0) endCal(false);
   listening=false; cancelAnimationFrame(raf);
   if(stream) stream.getTracks().forEach(t=>t.stop());
-  $("mic").textContent="🎤 Zuhören"; $("mic").className="primary";
-  $("meter").style.display="none"; $("sensWrap").style.display="none"; $("hint").textContent="";
+  $("mic").className="primary";
+  $("meter").style.display="none"; $("hint").textContent="";
 }
 
 let avg=0.002, lastHit=0, pending=0;
@@ -288,6 +355,7 @@ function updateCalUI(){
   $("cal").textContent = calIdx>=0 ? "✖ Kalibrierung abbrechen" : (cal ? "🎯 Neu kalibrieren" : "🎯 Kalibrieren");
   $("cal").className = calIdx>=0 ? "calon" : "";
   $("calreset").disabled = !cal;
+  $("calcancel").style.display = calIdx>=0 ? "block" : "none";
   $("calState").textContent = cal ? "Kalibrierung gespeichert." : "Keine Kalibrierung gespeichert.";
 }
 function calHit(fs){
@@ -312,19 +380,30 @@ function endCal(ok){
   $("hint").textContent = ok ? "Kalibriert ✓ – die App erkennt jetzt dein Glockenspiel." : "";
 }
 $("cal").onclick=async()=>{
+  $("settings").close();
   if(calIdx>=0){ endCal(false); return; }
+  if(mode!=="play"){ setMode("play"); renderTrack(); }
   if(!listening && !(await startMic())) return;
   calIdx=0; calTmp={}; updateCalUI(); show();
 };
-$("settingsBtn").onclick=()=>{ $("setMsg").textContent=""; updateCalUI(); $("settings").showModal(); };
+$("calcancel").onclick=()=>endCal(false);
+function openSettings(){ $("setMsg").textContent=""; $("optAuto").checked=opts.auto; $("optSpeak").checked=opts.speak; updateCalUI(); $("settings").showModal(); }
+// Eltern-Bereich: Zahnrad ~1 Sekunde gedrückt halten (Tastatur: Enter)
+const gear=$("settingsBtn"); let gearT=0;
+gear.addEventListener("pointerdown",()=>{ gear.classList.add("hold"); clearTimeout(gearT); gearT=setTimeout(()=>{ gear.classList.remove("hold"); openSettings(); },800); });
+["pointerup","pointerleave","pointercancel"].forEach(ev=>gear.addEventListener(ev,()=>{ clearTimeout(gearT); gear.classList.remove("hold"); }));
+gear.addEventListener("click",e=>{ if(e.detail===0) openSettings(); });
+gear.addEventListener("contextmenu",e=>e.preventDefault());
 $("setClose").onclick=()=>$("settings").close();
 $("settings").addEventListener("click",e=>{ if(e.target===$("settings")) $("settings").close(); });
+$("optAuto").onchange=()=>{ opts.auto=$("optAuto").checked; saveOpts(); };
+$("optSpeak").onchange=()=>{ opts.speak=$("optSpeak").checked; saveOpts(); };
 $("calreset").onclick=()=>{ cal=null; saveCal(); updateCalUI(); $("setMsg").textContent="Kalibrierung gelöscht."; };
-$("clearall").onclick=()=>{ try{ localStorage.clear(); }catch(e){} cal=null; updateCalUI(); $("setMsg").textContent="Alle gespeicherten Daten gelöscht."; };
+$("clearall").onclick=()=>{ try{ localStorage.clear(); }catch(e){} cal=null; opts={...OPT_DEF}; $("optAuto").checked=opts.auto; $("optSpeak").checked=opts.speak; updateCalUI(); $("setMsg").textContent="Alle gespeicherten Daten gelöscht."; };
 if(!canMic){ $("cal").style.display="none"; }
 updateCalUI();
 
-renderSongs(); renderTrack(); show();
+setMode("home"); renderSongs(); renderTrack(); show();
 </script>
 </body>
 </html>
