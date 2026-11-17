@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mein Glockenspiel</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FBF6EE">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Glockenspiel">
 <style>
   :root{--bg:#FBF6EE;--ink:#2B2522;--muted:#8A7F78;--card:#fff;}
   *{box-sizing:border-box}
@@ -404,6 +411,7 @@ if(!canMic){ $("cal").style.display="none"; }
 updateCalUI();
 
 setMode("home"); renderSongs(); renderTrack(); show();
+if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
