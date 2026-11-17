@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mein Glockenspiel</title>
+<style>
+  :root{--bg:#FBF6EE;--ink:#2B2522;--muted:#8A7F78;--card:#fff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+       min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 12px 32px}
+  h1{font-size:20px;margin:4px 0 12px;letter-spacing:.2px}
+  .songs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+  .songs button{border:2px solid #E3D9CC;background:var(--card);border-radius:999px;padding:9px 16px;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer}
+  .songs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .stage{position:relative;width:min(92vw,420px);display:flex;flex-direction:column;align-items:center}
+  .big{width:min(60vw,240px);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;
+       font-size:min(22vw,92px);font-weight:800;color:#fff;cursor:pointer;user-select:none;
+       box-shadow:0 10px 0 rgba(0,0,0,.12), inset 0 -10px 0 rgba(0,0,0,.08);transition:transform .12s, background .2s;position:relative}
+  .big:active{transform:translateY(4px)}
+  .big .star{position:absolute;top:6%;right:10%;font-size:.45em;color:#F2B63C;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+  .big.hit{animation:pop .35s}
+  .big.miss{animation:shake .4s}
+  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-14px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(5px)}}
+  .colname{margin-top:18px;font-size:22px;font-weight:700}
+  .syl{font-size:28px;font-weight:800;margin-top:4px;min-height:36px}
+  .hint{font-size:14px;color:var(--muted);min-height:20px;margin-top:4px;text-align:center}
+  .track{display:flex;gap:6px;overflow-x:auto;width:min(96vw,760px);padding:18px 8px 8px;scroll-behavior:smooth;margin-top:6px}
+  .dot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.45}
+  .dot .c{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+  .dot .t{font-size:11px;color:var(--muted);height:14px;white-space:nowrap}
+  .dot.done{opacity:.25}
+  .dot.cur{opacity:1}
+  .dot.cur .c{outline:3px solid var(--ink);outline-offset:3px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+  .controls button{border:none;border-radius:14px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer;background:#EDE4D8;color:var(--ink)}
+  .controls button.primary{background:#2B9BD9;color:#fff}
+  .controls button.listening{background:#B4504B;color:#fff}
+  .meter{width:min(70vw,260px);height:8px;background:#EDE4D8;border-radius:4px;margin-top:12px;overflow:hidden;display:none}
+  .meter i{display:block;height:100%;width:0;background:#3F6B47;transition:width .05s}
+  .done-box{display:none;flex-direction:column;align-items:center;margin-top:10px}
+  .done-box .yay{font-size:56px}
+  .done-box p{font-size:22px;font-weight:800;margin:6px 0}
+  .sens{display:none;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:8px}
+  footer{margin-top:22px;font-size:12px;color:var(--muted);text-align:center;max-width:420px;line-height:1.4}
+</style>
+</head>
+<body>
+<h1>🎵 Mein Glockenspiel</h1>
+<div class="songs" id="songs"></div>
+
+<div class="stage">
+  <div class="big" id="big" title="Antippen = weiter"></div>
+  <div class="colname" id="colname"></div>
+  <div class="syl" id="syl"></div>
+  <div class="hint" id="hint"></div>
+  <div class="done-box" id="done"><div class="yay">🎉⭐🎉</div><p>Super gemacht!</p></div>
+</div>
+
+<div class="track" id="track"></div>
+
+<div class="controls">
+  <button id="mic" class="primary">🎤 Zuhören</button>
+  <button id="play">🔔 Vorspielen</button>
+  <button id="back">⬅️ Zurück</button>
+  <button id="restart">🔁 Von vorn</button>
+</div>
+<div class="meter" id="meter"><i id="lvl"></i></div>
+<label class="sens" id="sensWrap">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6"></label>
+
+<footer id="foot">Großen Kreis antippen = nächster Ton. „Vorspielen“ zeigt, wie der Ton klingt.</footer>
+
+<script>
+const COL = {
+  C:{hex:"#3F6B47",name:"Grün",pc:0}, D:{hex:"#5B4239",name:"Braun",pc:2}, E:{hex:"#B4504B",name:"Rot",pc:4},
+  F:{hex:"#F2B63C",name:"Gelb",pc:5}, G:{hex:"#9AA6B2",name:"Grau",pc:7}, A:{hex:"#2B9BD9",name:"Blau",pc:9},
+  H:{hex:"#8E5E9E",name:"Lila",pc:11}, c:{hex:"#3F6B47",name:"Grün rechts",pc:0}
+};
+const FREQ = {C:1046.5,D:1174.7,E:1318.5,F:1396.9,G:1568.0,A:1760.0,H:1975.5,c:2093.0};
+
+// syllable + notes (2 letters = two notes on one syllable)
+function build(lines){
+  const out=[];
+  lines.forEach((line,li)=>{
+    line.trim().split(/\s+/).forEach(tok=>{
+      const [s,n]=tok.split("|");
+      [...n].forEach((ch,i)=>out.push({s: i===0 ? s.replace(/_/g," ") : "～", n: ch, line: li}));
+    });
+  });
+  return out;
+}
+const SONGS = {
+  froh: {title:"Lasst uns froh und munter sein", notes: build([
+    "Lasst|G uns|G froh|GA und|GF mun-|E ter|E sein,|E",
+    "und|F uns|F recht|FG von|FE Her-|D zen|D freun!|D",
+    "Lus-|C tig,|D lus-|E tig,|F tra-le-|GA ra-le-|GA ra,|G",
+    "bald|c ist|G Ni-|GA ko-|GF laus-|E a-bend|D da,|G",
+    "bald|c ist|G Ni-|GA ko-|GF laus-|E a-bend|D da!|C"])},
+  jingle: {title:"Jingle Bells", notes: build([
+    "Jin-|E gle|E bells,|E jin-|E gle|E bells,|E",
+    "jin-|E gle|G all|C the|D way!|E",
+    "Oh|F what|F fun|F it|F is|F to|E ride|E in|E a|E",
+    "one-|E horse|D o-|D pen|E sleigh,|D hey!|G",
+    "Jin-|E gle|E bells,|E jin-|E gle|E bells,|E",
+    "jin-|E gle|G all|C the|D way!|E",
+    "Oh|F what|F fun|F it|F is|F to|E ride|E in|E a|E",
+    "one-|G horse|G o-|F pen|D sleigh!|C"])},
+  weihnachtsmann: {title:"Morgen kommt der Weihnachtsmann", notes: build([
+    "Mor-|C gen|C kommt|G der|G Weih-|A nachts-|A mann,|G",
+    "kommt|F mit|F sei-|E nen|E Ga-|DD ben.|C",
+    "Trom-|G mel,|G Pfei-|F fe|F und|E Ge-|E wehr,|D",
+    "Fahn|G und|G Sä-|F bel|F und|E noch|E mehr,|D",
+    "ja|C ein|C gan-|G zes|G Krie-|A ges-|A heer,|G",
+    "möcht|F ich|F ger-|E ne|E ha-|DD ben.|C"])}
+};
+
+let songKey="froh", idx=0, ctx=null;
+const $=id=>document.getElementById(id);
+
+function renderSongs(){
+  $("songs").innerHTML="";
+  for(const k in SONGS){
+    const b=document.createElement("button");
+    b.textContent=SONGS[k].title; if(k===songKey) b.className="on";
+    b.onclick=()=>{songKey=k; idx=0; renderSongs(); renderTrack(); show();};
+    $("songs").appendChild(b);
+  }
+}
+function renderTrack(){
+  const t=$("track"); t.innerHTML="";
+  SONGS[songKey].notes.forEach((x,i)=>{
+    const d=document.createElement("div"); d.className="dot";
+    if(i>0 && x.line!==SONGS[songKey].notes[i-1].line) d.style.marginLeft="14px";
+    d.innerHTML=`<div class="c" style="background:${COL[x.n].hex}">${x.n==="c"?"C*":x.n}</div><div class="t">${x.s}</div>`;
+    d.onclick=()=>{idx=i;show();};
+    t.appendChild(d);
+  });
+}
+function show(){
+  const notes=SONGS[songKey].notes, done=idx>=notes.length;
+  $("done").style.display=done?"flex":"none";
+  $("big").style.display=done?"none":"flex";
+  $("colname").style.display=done?"none":"block";
+  $("syl").style.display=done?"none":"block";
+  [...$("track").children].forEach((d,i)=>d.className="dot"+(i<idx?" done":"")+(i===idx?" cur":""));
+  if(done){ $("hint").textContent=""; return; }
+  const x=notes[idx], c=COL[x.n];
+  $("big").style.background=c.hex;
+  $("big").innerHTML=(x.n==="c"?"C":x.n)+(x.n==="c"?'<span class="star">★</span>':"");
+  $("colname").textContent=c.name + (x.n==="C" && SONGS[songKey].notes.some(y=>y.n==="c") ? " links" : "");
+  $("syl").textContent=x.s;
+  const cur=$("track").children[idx];
+  if(cur){ const t=$("track"); t.scrollLeft = cur.offsetLeft - t.clientWidth/2 + 17; }
+}
+function next(){ const b=$("big"); b.classList.remove("hit"); void b.offsetWidth; b.classList.add("hit"); idx++; show(); }
+function miss(n){ const b=$("big"); b.classList.remove("miss"); void b.offsetWidth; b.classList.add("miss");
+  $("hint").textContent = "Das war "+COL[n].name+" – probier nochmal!"; clearTimeout(miss.t); miss.t=setTimeout(()=>$("hint").textContent="",1500); }
+
+function audio(){ if(!ctx){ ctx=new (window.AudioContext||window.webkitAudioContext)(); } if(ctx.state==="suspended") ctx.resume(); return ctx; }
+function bell(n){
+  const a=audio(), t=a.currentTime, f=FREQ[n]/2;
+  [[1,0.5,1.6],[2.76,0.12,0.5],[5.4,0.05,0.25]].forEach(([m,g,d])=>{
+    const o=a.createOscillator(), v=a.createGain(); o.type="sine"; o.frequency.value=f*m;
+    v.gain.setValueAtTime(0,t); v.gain.linearRampToValueAtTime(g,t+0.005); v.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    o.connect(v).connect(a.destination); o.start(t); o.stop(t+d+0.05);
+  });
+}
+
+$("big").onclick=()=>next();
+$("play").onclick=()=>{ const x=SONGS[songKey].notes[idx]; if(x) bell(x.n); };
+$("back").onclick=()=>{ idx=Math.max(0,idx-1); show(); };
+$("restart").onclick=()=>{ idx=0; show(); };
+
+// ---------- Mikrofon ----------
+let listening=false, stream=null, analyser=null, raf=null;
+const canMic = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+if(!canMic){ $("mic").style.display="none"; }
+
+$("mic").onclick=async()=>{
+  if(listening){ stopMic(); return; }
+  try{
+    const a=audio();
+    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    const src=a.createMediaStreamSource(stream);
+    analyser=a.createAnalyser(); analyser.fftSize=8192; analyser.smoothingTimeConstant=0;
+    src.connect(analyser);
+    listening=true; $("mic").textContent="⏹ Zuhören aus"; $("mic").className="listening";
+    $("meter").style.display="block"; $("sensWrap").style.display="flex";
+    $("hint").textContent="Ich höre zu – spiel den Ton!";
+    loop();
+  }catch(e){
+    $("mic").style.display="none";
+    $("foot").innerHTML="Das Mikrofon ist hier nicht erlaubt. Öffne die HTML-Datei im Browser (z.&nbsp;B. Chrome), dann hört die App zu. Bis dahin: großen Kreis antippen.";
+  }
+};
+function stopMic(){
+  listening=false; cancelAnimationFrame(raf);
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  $("mic").textContent="🎤 Zuhören"; $("mic").className="primary";
+  $("meter").style.display="none"; $("sensWrap").style.display="none"; $("hint").textContent="";
+}
+
+let avg=0.002, lastHit=0, pending=0;
+function loop(){
+  raf=requestAnimationFrame(loop);
+  const td=new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(td);
+  let s=0; for(let i=0;i<td.length;i+=4) s+=td[i]*td[i]; const rms=Math.sqrt(s/(td.length/4));
+  $("lvl").style.width=Math.min(100,rms*600)+"%";
+  const now=performance.now(), sens=+$("sens").value;
+  const minRms = 0.004 + (10-sens)*0.006;
+  if(!pending && now-lastHit>220 && rms>minRms && rms>avg*3){ pending=now; }
+  avg = avg*0.95 + rms*0.05;
+  if(pending && now-pending>45){ pending=0; lastHit=now; detect(); }
+}
+function detect(){
+  const a=audio(), sr=a.sampleRate, N=analyser.frequencyBinCount;
+  const sp=new Float32Array(N); analyser.getFloatFrequencyData(sp);
+  const binHz=sr/analyser.fftSize, lo=Math.floor(450/binHz), hi=Math.ceil(5000/binHz);
+  // collect local peaks
+  const peaks=[];
+  for(let i=lo+1;i<hi;i++){ if(sp[i]>sp[i-1] && sp[i]>=sp[i+1]) peaks.push(i); }
+  peaks.sort((x,y)=>sp[y]-sp[x]);
+  if(!peaks.length) return;
+  const top=sp[peaks[0]], cands=[];
+  for(const i of peaks.slice(0,4)){
+    if(sp[i]<top-12) break;
+    const p=0.5*(sp[i-1]-sp[i+1])/(sp[i-1]-2*sp[i]+sp[i+1]||1);
+    const f=(i+p)*binHz, midi=69+12*Math.log2(f/440), r=Math.round(midi);
+    if(Math.abs(midi-r)<0.4) cands.push(((r%12)+12)%12);
+  }
+  if(!cands.length) return;
+  const x=SONGS[songKey].notes[idx]; if(!x) return;
+  if(cands.includes(COL[x.n].pc)) next();
+  else { const k=Object.keys(COL).find(k=>k!=="c" && COL[k].pc===cands[0]); if(k) miss(k); }
+}
+
+renderSongs(); renderTrack(); show();
+</script>
+</body>
+</html>
