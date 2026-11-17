@@ -37,12 +37,20 @@
   .controls button{border:none;border-radius:14px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer;background:#EDE4D8;color:var(--ink)}
   .controls button.primary{background:#2B9BD9;color:#fff}
   .controls button.listening{background:#B4504B;color:#fff}
+  .controls button.calon{background:#F2B63C;color:#2B2522}
   .meter{width:min(70vw,260px);height:8px;background:#EDE4D8;border-radius:4px;margin-top:12px;overflow:hidden;display:none}
   .meter i{display:block;height:100%;width:0;background:#3F6B47;transition:width .05s}
   .done-box{display:none;flex-direction:column;align-items:center;margin-top:10px}
   .done-box .yay{font-size:56px}
   .done-box p{font-size:22px;font-weight:800;margin:6px 0}
   .sens{display:none;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:8px}
+  dialog{border:none;border-radius:18px;padding:20px;max-width:min(92vw,360px);background:var(--card);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+  dialog::backdrop{background:rgba(0,0,0,.4)}
+  dialog h2{margin:0 0 8px;font-size:18px}
+  dialog button{display:block;width:100%;margin-top:8px;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;background:#EDE4D8;color:var(--ink)}
+  dialog button.primary{background:#2B9BD9;color:#fff;margin-top:14px}
+  dialog button:disabled{opacity:.4;cursor:default}
+  dialog .st{font-size:13px;color:var(--muted);margin:4px 0;min-height:18px}
   footer{margin-top:22px;font-size:12px;color:var(--muted);text-align:center;max-width:420px;line-height:1.4}
 </style>
 </head>
@@ -65,7 +73,18 @@
   <button id="play">🔔 Vorspielen</button>
   <button id="back">⬅️ Zurück</button>
   <button id="restart">🔁 Von vorn</button>
+  <button id="cal">🎯 Kalibrieren</button>
+  <button id="settingsBtn" title="Einstellungen">⚙️</button>
 </div>
+
+<dialog id="settings">
+  <h2>⚙️ Einstellungen</h2>
+  <p class="st" id="calState"></p>
+  <button id="calreset">🗑 Kalibrierung löschen</button>
+  <button id="clearall">🧹 Alle gespeicherten Daten löschen</button>
+  <p class="st" id="setMsg"></p>
+  <button id="setClose" class="primary">Schließen</button>
+</dialog>
 <div class="meter" id="meter"><i id="lvl"></i></div>
 <label class="sens" id="sensWrap">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6"></label>
 
@@ -115,7 +134,10 @@ const SONGS = {
     "möcht|F ich|F ger-|E ne|E ha-|DD ben.|C"])}
 };
 
-let songKey="froh", idx=0, ctx=null;
+const ORDER=["C","D","E","F","G","A","H","c"];
+let songKey="froh", idx=0, ctx=null, calIdx=-1, calTmp={}, cal=loadCal();
+function loadCal(){ try{ const o=JSON.parse(localStorage.getItem("glock-cal")||"null"); if(o && ORDER.every(n=>o[n]>400)) return o; }catch(e){} return null; }
+function saveCal(){ try{ if(cal) localStorage.setItem("glock-cal",JSON.stringify(cal)); else localStorage.removeItem("glock-cal"); }catch(e){} }
 const $=id=>document.getElementById(id);
 
 function renderSongs(){
@@ -138,6 +160,17 @@ function renderTrack(){
   });
 }
 function show(){
+  if(calIdx>=0){
+    const n=ORDER[calIdx], c=COL[n];
+    $("done").style.display="none"; $("big").style.display="flex"; $("colname").style.display="block"; $("syl").style.display="block";
+    $("big").style.background=c.hex;
+    $("big").innerHTML=(n==="c"?"C":n)+(n==="c"?'<span class="star">★</span>':"");
+    $("colname").textContent=c.name;
+    $("syl").textContent="Kalibrieren "+(calIdx+1)+"/"+ORDER.length;
+    $("hint").textContent="Schlag diesen Stab einzeln an (Kreis antippen = überspringen)";
+    [...$("track").children].forEach(d=>d.className="dot done");
+    return;
+  }
   const notes=SONGS[songKey].notes, done=idx>=notes.length;
   $("done").style.display=done?"flex":"none";
   $("big").style.display=done?"none":"flex";
@@ -159,7 +192,7 @@ function miss(n){ const b=$("big"); b.classList.remove("miss"); void b.offsetWid
 
 function audio(){ if(!ctx){ ctx=new (window.AudioContext||window.webkitAudioContext)(); } if(ctx.state==="suspended") ctx.resume(); return ctx; }
 function bell(n){
-  const a=audio(), t=a.currentTime, f=FREQ[n]/2;
+  const a=audio(), t=a.currentTime, f=(cal?cal[n]:FREQ[n])/2;
   [[1,0.5,1.6],[2.76,0.12,0.5],[5.4,0.05,0.25]].forEach(([m,g,d])=>{
     const o=a.createOscillator(), v=a.createGain(); o.type="sine"; o.frequency.value=f*m;
     v.gain.setValueAtTime(0,t); v.gain.linearRampToValueAtTime(g,t+0.005); v.gain.exponentialRampToValueAtTime(0.0001,t+d);
@@ -167,7 +200,7 @@ function bell(n){
   });
 }
 
-$("big").onclick=()=>next();
+$("big").onclick=()=>{ if(calIdx>=0) calAdvance(); else next(); };
 $("play").onclick=()=>{ const x=SONGS[songKey].notes[idx]; if(x) bell(x.n); };
 $("back").onclick=()=>{ idx=Math.max(0,idx-1); show(); };
 $("restart").onclick=()=>{ idx=0; show(); };
@@ -177,8 +210,8 @@ let listening=false, stream=null, analyser=null, raf=null;
 const canMic = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 if(!canMic){ $("mic").style.display="none"; }
 
-$("mic").onclick=async()=>{
-  if(listening){ stopMic(); return; }
+$("mic").onclick=()=>{ if(listening) stopMic(); else startMic(); };
+async function startMic(){
   try{
     const a=audio();
     stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
@@ -189,12 +222,15 @@ $("mic").onclick=async()=>{
     $("meter").style.display="block"; $("sensWrap").style.display="flex";
     $("hint").textContent="Ich höre zu – spiel den Ton!";
     loop();
+    return true;
   }catch(e){
     $("mic").style.display="none";
     $("foot").innerHTML="Das Mikrofon ist hier nicht erlaubt. Öffne die HTML-Datei im Browser (z.&nbsp;B. Chrome), dann hört die App zu. Bis dahin: großen Kreis antippen.";
+    return false;
   }
-};
+}
 function stopMic(){
+  if(calIdx>=0) endCal(false);
   listening=false; cancelAnimationFrame(raf);
   if(stream) stream.getTracks().forEach(t=>t.stop());
   $("mic").textContent="🎤 Zuhören"; $("mic").className="primary";
@@ -213,27 +249,80 @@ function loop(){
   avg = avg*0.95 + rms*0.05;
   if(pending && now-pending>45){ pending=0; lastHit=now; detect(); }
 }
-function detect(){
+function peakFreqs(){
   const a=audio(), sr=a.sampleRate, N=analyser.frequencyBinCount;
   const sp=new Float32Array(N); analyser.getFloatFrequencyData(sp);
   const binHz=sr/analyser.fftSize, lo=Math.floor(450/binHz), hi=Math.ceil(5000/binHz);
-  // collect local peaks
   const peaks=[];
   for(let i=lo+1;i<hi;i++){ if(sp[i]>sp[i-1] && sp[i]>=sp[i+1]) peaks.push(i); }
   peaks.sort((x,y)=>sp[y]-sp[x]);
-  if(!peaks.length) return;
-  const top=sp[peaks[0]], cands=[];
+  if(!peaks.length) return [];
+  const top=sp[peaks[0]], out=[];
   for(const i of peaks.slice(0,4)){
     if(sp[i]<top-12) break;
     const p=0.5*(sp[i-1]-sp[i+1])/(sp[i-1]-2*sp[i]+sp[i+1]||1);
-    const f=(i+p)*binHz, midi=69+12*Math.log2(f/440), r=Math.round(midi);
-    if(Math.abs(midi-r)<0.4) cands.push(((r%12)+12)%12);
+    out.push((i+p)*binHz);
   }
-  if(!cands.length) return;
+  return out; // stärkste zuerst
+}
+const cents=(f,ref)=>1200*Math.log2(f/ref);
+function detect(){
+  const fs=peakFreqs(); if(!fs.length) return;
+  if(calIdx>=0){ calHit(fs); return; }
   const x=SONGS[songKey].notes[idx]; if(!x) return;
+  if(cal){
+    // gegen die kalibrierten Frequenzen prüfen (±50 Cent)
+    if(fs.some(f=>Math.abs(cents(f,cal[x.n]))<50)) { next(); return; }
+    for(const f of fs){ const k=ORDER.find(k=>k!=="c" && Math.abs(cents(f,cal[k]))<50); if(k){ miss(k); return; } }
+    return;
+  }
+  const cands=[];
+  for(const f of fs){ const midi=69+12*Math.log2(f/440), r=Math.round(midi); if(Math.abs(midi-r)<0.4) cands.push(((r%12)+12)%12); }
+  if(!cands.length) return;
   if(cands.includes(COL[x.n].pc)) next();
   else { const k=Object.keys(COL).find(k=>k!=="c" && COL[k].pc===cands[0]); if(k) miss(k); }
 }
+
+// ---------- Kalibrierung ----------
+function updateCalUI(){
+  $("cal").textContent = calIdx>=0 ? "✖ Kalibrierung abbrechen" : (cal ? "🎯 Neu kalibrieren" : "🎯 Kalibrieren");
+  $("cal").className = calIdx>=0 ? "calon" : "";
+  $("calreset").disabled = !cal;
+  $("calState").textContent = cal ? "Kalibrierung gespeichert." : "Keine Kalibrierung gespeichert.";
+}
+function calHit(fs){
+  const n=ORDER[calIdx], nominal=FREQ[n];
+  const f=fs.find(f=>Math.abs(cents(f,nominal))<120);  // stärkster Peak nahe dem erwarteten Ton
+  if(!f){ $("hint").textContent="Nicht erkannt – nochmal anschlagen"; return; }
+  calTmp[n]=f; $("hint").textContent=Math.round(f)+" Hz ✓";
+  setTimeout(calAdvance,350);
+}
+function calAdvance(){
+  if(calIdx<0) return;
+  calIdx++;
+  if(calIdx>=ORDER.length) endCal(true); else show();
+}
+function endCal(ok){
+  calIdx=-1;
+  if(ok){
+    // übersprungene Töne: bisherige Werte bzw. Nominalwert behalten
+    const base=cal||FREQ; cal={}; ORDER.forEach(n=>cal[n]=calTmp[n]||base[n]); saveCal();
+  }
+  updateCalUI(); show();
+  $("hint").textContent = ok ? "Kalibriert ✓ – die App erkennt jetzt dein Glockenspiel." : "";
+}
+$("cal").onclick=async()=>{
+  if(calIdx>=0){ endCal(false); return; }
+  if(!listening && !(await startMic())) return;
+  calIdx=0; calTmp={}; updateCalUI(); show();
+};
+$("settingsBtn").onclick=()=>{ $("setMsg").textContent=""; updateCalUI(); $("settings").showModal(); };
+$("setClose").onclick=()=>$("settings").close();
+$("settings").addEventListener("click",e=>{ if(e.target===$("settings")) $("settings").close(); });
+$("calreset").onclick=()=>{ cal=null; saveCal(); updateCalUI(); $("setMsg").textContent="Kalibrierung gelöscht."; };
+$("clearall").onclick=()=>{ try{ localStorage.clear(); }catch(e){} cal=null; updateCalUI(); $("setMsg").textContent="Alle gespeicherten Daten gelöscht."; };
+if(!canMic){ $("cal").style.display="none"; }
+updateCalUI();
 
 renderSongs(); renderTrack(); show();
 </script>
