@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mein Glockenspiel</title>
+    <meta name="description" content="Glockenspiel-Lieder lernen mit Farben und Mikrofon" />
+    <meta name="theme-color" content="#FBF6EE" />
+    <link rel="icon" type="image/png" href="/Glockenspiel/pr-preview/pr-4/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/Glockenspiel/pr-preview/pr-4/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Glockenspiel" />
+    <script type="module" crossorigin src="/Glockenspiel/pr-preview/pr-4/assets/index-15xBnYsU.js"></script>
+    <link rel="stylesheet" crossorigin href="/Glockenspiel/pr-preview/pr-4/assets/index-D_tjLKol.css">
+  <link rel="manifest" href="/Glockenspiel/pr-preview/pr-4/manifest.webmanifest"></head>
+  <body class="home">
+    <button
+      class="gear"
+      id="settingsBtn"
+      title="Eltern-Bereich (gedrückt halten)"
+      aria-label="Eltern-Bereich"
+    >
+      ⚙️
+    </button>
+    <div class="gearhint" id="gearhint" role="status" hidden>⚙ Zum Öffnen gedrückt halten</div>
+    <h1 id="title">🎵 Mein Glockenspiel</h1>
+    <div class="songs" id="songs"></div>
+
+    <div class="stage">
+      <div class="big" id="big" title="Antippen = weiter"></div>
+      <!-- Staff notation (parent option; left of the circle on tablets and laptops, hidden on phones) -->
+      <div class="staff idle" id="staff" role="img"></div>
+      <div class="colname" id="colname"></div>
+      <div class="syl" id="syl"></div>
+      <!-- Whole glockenspiel with the bar to strike popping out (tablet portrait: below the circle; landscape: beside it; see style.css) -->
+      <div class="instrument" id="instrument" role="group" aria-label="Glockenspiel"></div>
+      <div class="next" id="next"></div>
+      <div class="hint" id="hint"></div>
+      <button class="calcancel" id="calcancel">✖ Kalibrierung abbrechen</button>
+      <div class="sparks" id="sparks"></div>
+      <div class="done-box" id="done">
+        <div class="yay">🎉⭐🎉</div>
+        <p>Super gemacht!</p>
+        <button id="again" class="again">🔁 Nochmal!</button>
+      </div>
+    </div>
+
+    <div class="track" id="track"></div>
+
+    <!-- Playback rows right below the track (landscape: beside the other controls, see style.css) -->
+    <div class="dock">
+      <div class="playback">
+        <div class="playrow">
+          <button id="playsong" title="Ganzes Lied vorspielen" aria-label="Ganzes Lied vorspielen">▶</button>
+        </div>
+        <div class="speed" role="group" aria-label="Tempo">
+          <button id="slower" title="Langsamer" aria-label="Langsamer">🐌</button>
+          <button id="speed" title="Normales Tempo" aria-label="Normales Tempo">1×</button>
+          <button id="faster" title="Schneller" aria-label="Schneller">🏎️</button>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="home" title="Lieder" aria-label="Lieder">🏠</button>
+        <button id="mic" class="primary" title="Zuhören" aria-label="Zuhören">🎤</button>
+        <button id="play" title="Vorspielen" aria-label="Vorspielen">🔊</button>
+        <button id="restart" class="restart">🔁 Von vorn</button>
+      </div>
+    </div>
+
+    <div class="meter" id="meter"><i id="lvl"></i></div>
+
+    <dialog id="settings">
+      <h2>⚙️ Eltern-Bereich</h2>
+      <label class="opt"><input type="checkbox" id="optAuto" /> Ton automatisch vorspielen</label>
+      <label class="opt"><input type="checkbox" id="optSpeak" /> Farbe vorlesen</label>
+      <label class="opt"><input type="checkbox" id="optStaff" /> Noten anzeigen</label>
+      <label class="opt">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6" /></label>
+      <button id="back">⬅️ Einen Ton zurück</button>
+      <button id="cal">🎯 Kalibrieren</button>
+      <p class="st" id="calState"></p>
+      <button id="calreset">🗑 Kalibrierung löschen</button>
+      <button id="clearall">🧹 Alle gespeicherten Daten löschen</button>
+      <p class="st" id="setMsg"></p>
+      <button id="setClose" class="primary">Schließen</button>
+    </dialog>
+
+    <footer id="foot"></footer>
+    <div class="preview" id="preview" hidden></div>
+
+  </body>
+</html>
