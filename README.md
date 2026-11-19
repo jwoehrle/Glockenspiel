@@ -81,8 +81,8 @@ tests/e2e-preview/    Playwright (live site + PR preview in the gh-pages layout)
   the bar to strike pops out.
   Tap the bars to play the song on the screen: the right bar moves on, a wrong one only wobbles.
 - **Language:** the drop-down with the flag (🇬🇧 / 🇩🇪) left of the ⚙ switches the interface between English and
-  German. Song titles and lyrics stay as they are. German is the default; the
-  choice is saved.
+  German. Song titles and lyrics stay as they are. The first visit uses the browser language (English if it is neither);
+  the choice is saved.
 - **Parent area:** press and hold the ⚙ in the top-right corner for about 0.8 seconds. It contains: autoplay, read the
   color aloud, staff notation (_Noten anzeigen_: the current and next note in a treble clef left of the circle, on
   tablets and laptops), microphone sensitivity, one note back, calibration, and clearing saved data.

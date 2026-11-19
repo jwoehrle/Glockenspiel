@@ -10,8 +10,8 @@ listens through the microphone to check that the right bar was struck. Hosted on
 
 ## Principles
 
-- Two UI languages, English and German, chosen with the flag drop-down next to the ⚙. The default is German (the child's
-  language), whatever the browser language is. Songs keep their own language.
+- Two UI languages, English and German, chosen with the flag drop-down next to the ⚙. The default is the browser
+  language (English if it is neither). Songs keep their own language.
 - Large, icon-based, minimal UI. The child must be able to use it alone.
 - A wrong note only gives a gentle wobble. No text, no error sound.
 - Parent options (autoplay, read-aloud, staff notation) are off by default and live in the press-and-hold settings dialog.

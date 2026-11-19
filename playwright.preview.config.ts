@@ -12,6 +12,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}/`,
     trace: "retain-on-failure",
+    // The existing tests check the German UI. i18n.spec.ts overrides the locale.
+    locale: "de-DE",
     ...devices["Desktop Chrome"],
     launchOptions: { args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] },
   },
