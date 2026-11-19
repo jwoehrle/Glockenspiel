@@ -30,7 +30,7 @@ Hosted on GitHub Pages, installable as a PWA.
   (`npm run check && npm run test:e2e && npm run test:e2e:preview`).
 - **Never rewrite git history or force-push without an explicit request.** (It was done once, deliberately, to remove a personal name.)
 - **Privacy:** the app and repo must not contain the child's name or other personal details. Keep text generic ("Mein Glockenspiel", "Super gemacht!").
-- UI text is **German**; code comments mix German/English; `README.md` and this file are English.
+- UI text is **German**; everything else (code, identifiers, comments, tests, commit messages, docs) is **English**. See `.kiro/steering/tech.md`.
 - The user writes in English or German; answer in the language they used.
 - No manual cache version bump is needed anymore: the service worker precaches hashed assets, and a new build produces a new worker.
 
