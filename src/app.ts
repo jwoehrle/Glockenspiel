@@ -1,5 +1,6 @@
 import { bell } from "./audio/bell";
 import { SongPlayer } from "./audio/player";
+import { DEFAULT_SPEED, faster, isFastest, isSlowest, slower, type Speed } from "./audio/speed";
 import { calibrationPeak, judge, type Calibration } from "./mic/detect";
 import { Mic, canMic } from "./mic/mic";
 import { COL, FREQ, ORDER, highTwin, isHigh, label, type NoteName } from "./notes";
@@ -48,31 +49,69 @@ function setPlayingUI(on: boolean): void {
   b.classList.toggle("playing", on);
 }
 
-/** Play the whole song from the start; circle, track and glockenspiel follow every note. */
-function playSong(): void {
+/** Effective tempo of ▶: the song's own tempo times the chosen speed. */
+const playBpm = (): number => song().bpm * opts.speed;
+
+/**
+ * Play the whole song from the start (or go on from note `from` after `lead` ms, when the speed changes during
+ * playback); circle, track and glockenspiel follow every note.
+ */
+function playSong(from = 0, lead = 0): void {
   if (calIdx >= 0) return;
   ++annId;
   clearTimeout(announceT);
   cancelSpeech();
   const notes = song().notes;
   setPlayingUI(true);
-  player.play(notes, song().bpm, {
-    onNote: (i) => {
-      const x = notes[i];
-      if (!x) return;
-      idx = i;
-      show();
-      restartAnim($("big"), "hit");
-      playTone(x.n);
+  player.play(
+    notes,
+    playBpm(),
+    {
+      onNote: (i) => {
+        const x = notes[i];
+        if (!x) return;
+        idx = i;
+        show();
+        restartAnim($("big"), "hit");
+        playTone(x.n);
+      },
+      onEnd: () => {
+        setPlayingUI(false);
+        // Back to the first note, ready to play along.
+        idx = 0;
+        show();
+        announce();
+      },
     },
-    onEnd: () => {
-      setPlayingUI(false);
-      // Back to the first note, ready to play along.
-      idx = 0;
-      show();
-      announce();
-    },
-  });
+    from,
+    lead,
+  );
+}
+
+function updateSpeedUI(): void {
+  // "1×" always reads 1× (it resets the speed); it is only highlighted while the speed is not 1×.
+  button("speed").classList.toggle("changed", opts.speed !== DEFAULT_SPEED);
+  button("slower").disabled = isSlowest(opts.speed);
+  button("faster").disabled = isFastest(opts.speed);
+}
+
+/**
+ * Change the speed of ▶. Unlike every other control this does not stop the playback: the song goes on at the
+ * new tempo with the next note (after the current note's length at the new tempo).
+ */
+function setSpeed(s: Speed): void {
+  if (s === opts.speed) return;
+  opts.speed = s;
+  saveOpts(opts);
+  updateSpeedUI();
+  if (!player.playing) return;
+  const notes = song().notes;
+  const x = notes[idx];
+  if (!x || idx + 1 >= notes.length) {
+    stopSong();
+    return;
+  }
+  playSong(idx + 1, ((x.beats + x.rest) * 60000) / playBpm());
 }
 
 /** Stop the playback (any other interaction does this first). Returns true if it was playing. */
@@ -377,6 +416,9 @@ function wire(): void {
   button("playsong").onclick = () => {
     if (!stopSong()) playSong();
   };
+  button("slower").onclick = () => setSpeed(slower(opts.speed));
+  button("faster").onclick = () => setSpeed(faster(opts.speed));
+  button("speed").onclick = () => setSpeed(DEFAULT_SPEED);
   button("play").onclick = () => {
     stopSong();
     const x = song().notes[idx];
@@ -498,6 +540,7 @@ function wire(): void {
     input("optSpeak").checked = opts.speak;
     input("optStaff").checked = opts.staff;
     document.body.classList.toggle("notation", opts.staff);
+    updateSpeedUI();
     updateCalUI();
     $("setMsg").textContent = "Alle gespeicherten Daten gelöscht.";
   };
@@ -506,6 +549,7 @@ function wire(): void {
 export function init(): void {
   wire();
   renderInstrument($("instrument"), tapBar);
+  updateSpeedUI();
   updateCalUI();
   setMode("home");
   renderSongs();

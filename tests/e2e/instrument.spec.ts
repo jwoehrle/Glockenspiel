@@ -149,7 +149,7 @@ for (const [name, viewport] of [
       if (!big || !ins) throw new Error("not laid out");
       expect(ins.x).toBeGreaterThan(big.x + big.width); // right of the circle
       expect(ins.y).toBeLessThan(big.y + big.height); // side by side, not below
-      for (const id of ["#track", ".controls"]) {
+      for (const id of ["#track", ".playback", ".controls"]) {
         const b = await page.locator(id).boundingBox();
         expect(b && b.y + b.height, `${id} visible without scrolling`).toBeLessThanOrEqual(viewport.height);
       }

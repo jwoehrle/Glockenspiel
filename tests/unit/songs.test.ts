@@ -3,7 +3,7 @@ import { ORDER } from "../../src/notes";
 import { SONGS, SONG_KEYS, build, parseLength } from "../../src/songs";
 
 // Icons used elsewhere in the UI; song tiles must not reuse them.
-const RESERVED_ICONS = ["🔊", "🎤", "🏠", "🔁", "⚙", "⭐", "✨", "🌟", "🎵", "▶", "⏹"];
+const RESERVED_ICONS = ["🔊", "🎤", "🏠", "🔁", "⚙", "⭐", "✨", "🌟", "🎵", "▶", "⏹", "🐌", "🏎", "🏎️"];
 
 describe("song data", () => {
   it.each(SONG_KEYS)("%s only uses the eleven bars", (k) => {

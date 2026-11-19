@@ -46,13 +46,26 @@
 
     <div class="track" id="track"></div>
 
-    <div class="controls">
-      <button id="home" title="Lieder" aria-label="Lieder">🏠</button>
-      <button id="mic" class="primary" title="Zuhören" aria-label="Zuhören">🎤</button>
-      <button id="play" title="Vorspielen" aria-label="Vorspielen">🔊</button>
-      <button id="playsong" title="Ganzes Lied vorspielen" aria-label="Ganzes Lied vorspielen">▶</button>
-      <button id="restart" class="restart">🔁 Von vorn</button>
+    <!-- Playback rows right below the track (landscape: beside the other controls, see style.css) -->
+    <div class="dock">
+      <div class="playback">
+        <div class="playrow">
+          <button id="playsong" title="Ganzes Lied vorspielen" aria-label="Ganzes Lied vorspielen">▶</button>
+        </div>
+        <div class="speed" role="group" aria-label="Tempo">
+          <button id="slower" title="Langsamer" aria-label="Langsamer">🐌</button>
+          <button id="speed" title="Normales Tempo" aria-label="Normales Tempo">1×</button>
+          <button id="faster" title="Schneller" aria-label="Schneller">🏎️</button>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="home" title="Lieder" aria-label="Lieder">🏠</button>
+        <button id="mic" class="primary" title="Zuhören" aria-label="Zuhören">🎤</button>
+        <button id="play" title="Vorspielen" aria-label="Vorspielen">🔊</button>
+        <button id="restart" class="restart">🔁 Von vorn</button>
+      </div>
     </div>
+
     <div class="meter" id="meter"><i id="lvl"></i></div>
 
     <dialog id="settings">

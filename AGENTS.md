@@ -72,12 +72,16 @@ Stop dev/preview servers when done.
   `playSong()`/`stopSong()` in `app.ts`: ▶ plays the whole song from the start; circle, track and glockenspiel
   follow every note; the microphone is muted; any other interaction (circle, bar, track, 🔊, 🔁, 🏠, calibration)
   stops it. Afterwards the song is back at the first note.
+- `src/audio/speed.ts` (pure): `SPEEDS` ½× ¾× 1× 1¼× 1½×, `slower`/`faster` (stop at the ends). Saved in the
+  options as `speed`. ▶ plays at `bpm × speed`. Changing the speed during playback does **not** stop it (the one
+  exception to "any interaction stops it"): the song goes on at the new tempo with the next note (`scheduleFrom`).
 - `src/storage.ts`: `localStorage` keys `glock-cal` (calibration) and `glock-opts` (options); never throws.
 - `src/ui/instrument.ts`: the whole glockenspiel under the circle (`renderInstrument`, `highlightBar`,
   `strikeBar`); the bar to strike pops out, and the bars are buttons (`tapBar` in `app.ts`). Two layouts in
   `style.css`: tablet portrait (portrait, ≥ 700 × 800 px) shows it below the circle; landscape ≥ 900 × 600 px
   (laptops, tablet landscape) uses a grid with the circle column left and the glockenspiel right, track and controls
-  below, without scrolling at 1280 × 640. Hidden on phones (portrait and landscape) and on the finish screen.
+  below, without scrolling at 1280 × 640. Below the track: `.dock` with the playback rows (`.playback`: ▶ alone, then
+  🐌 1× 🏎) and the other `.controls`; stacked in portrait, side by side in landscape (smaller ▶ and speed buttons). Hidden on phones (portrait and landscape) and on the finish screen.
 - `src/ui/staff.ts`: staff notation (treble clef, C major, no accidentals). `staffStep` (C = c'' = step 7 ... f = f''' = step 17,
   written an octave below the sounding pitch like children's glockenspiel books), `ledgerSteps`, `renderStaff` (current note in
   the bar's color plus the next one faded). Clef is a hand-drawn SVG path (music fonts are not reliably installed). Parent option
@@ -132,11 +136,11 @@ Stop dev/preview servers when done.
 ## UI decisions to preserve
 
 - Large, icon-based, minimal start screen (song tiles only). Tapping a tile starts the song and turns the mic on.
-- Controls are icon-only (🏠 🎤 🔊 ▶/⏹) plus a big yellow "🔁 Von vorn". ▶ plays the whole song in rhythm. The finish screen has a big "🔁 Nochmal!".
+- Controls are icon-only (🏠 🎤 🔊 ▶/⏹, and the speed of ▶: 🐌 slower, **1×**, which always reads 1× and resets the speed (highlighted while it is not 1×), 🏎 faster) plus a big yellow "🔁 Von vorn". ▶ plays the whole song in rhythm. The finish screen has a big "🔁 Nochmal!".
 - **Every song tile needs a unique icon that is not used elsewhere in the UI** (enforced by a unit test). Current:
   🥜 Lasst uns froh und munter sein, ❄ Jingle Bells, 🎅 Morgen kommt der Weihnachtsmann, 🎄 Alle Jahre wieder,
   👶 Ihr Kinderlein, 🔔 Kling, Glöckchen, 😴 Bruder Jakob, 🎆 Freude, schöner Götterfunken. Avoid 🔊 🎤 🏠 🔁 ⚙ 🎵 ▶ ⏹
-  and the praise sparkles ⭐ ✨ 🌟.
+  🐌 🏎 and the praise sparkles ⭐ ✨ 🌟.
 - Autoplay, read-aloud and staff notation are options in the parent area, all **off by default**.
 - Playing without a real glockenspiel: tapping a bar of the on-screen glockenspiel plays its tone and is judged
   like a real strike (right bar → next note, wrong bar → wobble only). Tapping the big circle plays the current
