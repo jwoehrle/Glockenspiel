@@ -1,4 +1,4 @@
-// Sonor-Kinderglockenspiel: 11 Stäbe c3–f4 (C-Dur). Kleinbuchstaben = hohe Stäbe rechts (gleiche Farbe wie links).
+// Sonor children's glockenspiel: 11 bars, c3–f4 (C major). Lowercase = high bars on the right (same color as the low twin).
 
 /** The eleven bars, low to high. */
 export const ORDER = ["C", "D", "E", "F", "G", "A", "H", "c", "d", "e", "f"] as const;

@@ -31,7 +31,7 @@ Hosted on GitHub Pages, installable as a PWA.
 - **Never rewrite git history or force-push without an explicit request.** (It was done once, deliberately, to remove a personal name.)
 - **Privacy:** the app and repo must not contain the child's name or other personal details. Keep text generic ("Mein Glockenspiel", "Super gemacht!").
 - UI text is **German**; everything else (code, identifiers, comments, tests, commit messages, docs) is **English**. See `.kiro/steering/tech.md`.
-- The user writes in English or German; answer in the language they used.
+- The default language is **English**. Answer in German only when the user writes in German.
 - No manual cache version bump is needed anymore: the service worker precaches hashed assets, and a new build produces a new worker.
 
 ## Commands
@@ -98,7 +98,8 @@ Stop dev/preview servers when done.
 
 - `tests/unit/*.test.ts` (Vitest): song data (valid bars, unique icons/titles, exact sequences of verified songs),
   `build()`, bars/frequencies, pitch math, peak picking on synthetic spectra, `judge()` incl. octave-specific
-  matching and calibration, onset detector timing.
+  matching and calibration, onset detector timing, playback schedule (`player.test.ts`), speed steps
+  (`speed.test.ts`), staff steps and ledger lines (`staff.test.ts`).
 - `tests/e2e/*.spec.ts` (Playwright, Chromium, against the production build):
   - `ui.spec.ts`: start screen, playing through a song, finish screen, controls, low/high bar labels, parent area
     press-and-hold, options persistence, loading an old eight-bar calibration.
@@ -106,10 +107,6 @@ Stop dev/preview servers when done.
     (`tests/e2e/fixtures.ts` generates them in `globalSetup`): correct strikes advance; low D does not count for the
     high d; high d does.
   - `pwa.spec.ts`: manifest and icons, service worker scope, offline reload.
-- `tests/e2e-preview/preview.spec.ts` (separate config `playwright.preview.config.ts`): builds the live site and a
-  preview into `.site/` (`scripts/build-pages-site.sh`), serves it with `scripts/serve-static.mjs`, and checks that
-  the preview opens as the preview even with the live worker installed, works offline, has its own manifest name and
-  keeps its own settings.
   - `playback.spec.ts`: ▶ with Playwright's fake clock: every note of Bruder Jakob starts on time and the circle,
     track and highlighted bar follow; stop, circle tap and 🏠 end the playback.
   - `notation.spec.ts`: staff notation option, position left of the circle (laptops, tablets), no scrolling, hidden on phones,
@@ -117,6 +114,10 @@ Stop dev/preview servers when done.
   - `instrument.spec.ts`: glockenspiel picture on tablet portrait (highlighted bar incl. D vs. d, colors/order,
     hidden on finish screen), playing by tapping bars or the circle (tones counted via an `AudioContext` spy),
     side-by-side layout on laptops and tablet landscape (no scrolling), hidden on phones. Saves screenshots to `test-results/`.
+- `tests/e2e-preview/preview.spec.ts` (separate config `playwright.preview.config.ts`): builds the live site and a
+  preview into `.site/` (`scripts/build-pages-site.sh`), serves it with `scripts/serve-static.mjs`, and checks that
+  the preview opens as the preview even with the live worker installed, works offline, has its own manifest name and
+  keeps its own settings.
 - The synthetic recordings are an approximation (fundamental + ×2.76 overtone). Real-instrument behavior still needs
   the user to try it on the glockenspiel and report back.
 

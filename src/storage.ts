@@ -8,11 +8,11 @@ export const CAL_KEY = `glock-cal${NS}`;
 export const OPT_KEY = `glock-opts${NS}`;
 
 export interface Options {
-  /** Play the next note automatically. */
+  /** Play the tone of each new note automatically. */
   auto: boolean;
   /** Read the color aloud. */
   speak: boolean;
-  /** Show the current note in staff notation next to the circle. */
+  /** Show the current and next note in staff notation next to the circle. */
   staff: boolean;
   /** Speed of ▶ (whole song), as a factor of the song's tempo. */
   speed: Speed;
