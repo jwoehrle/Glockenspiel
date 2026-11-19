@@ -6,5 +6,5 @@ export const currentIndex = (page: Page): Promise<number> =>
 
 export async function openSong(page: Page, title: string): Promise<void> {
   await page.locator("#songs button", { hasText: title }).click();
-  await expect(page.locator("body")).toHaveClass("play");
+  await expect(page.locator("body")).toHaveClass(/^play\b/);
 }

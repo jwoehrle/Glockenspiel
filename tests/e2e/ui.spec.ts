@@ -64,8 +64,13 @@ test("tapping the circle walks through the song to the finish screen and back", 
 test("parent area opens only on press-and-hold or keyboard", async ({ page }) => {
   const gear = page.locator("#settingsBtn");
   const dialog = page.locator("#settings");
+  const hint = page.locator("#gearhint");
   await gear.click();
   await expect(dialog).not.toBeVisible();
+  // A short tap explains how to open it (instead of doing nothing), then the hint goes away again.
+  await expect(hint).toBeVisible();
+  await expect(hint).toContainText("gedrückt halten");
+  await expect(hint).toBeHidden({ timeout: 6000 });
 
   const box = await gear.boundingBox();
   if (!box) throw new Error("gear not visible");
@@ -74,6 +79,7 @@ test("parent area opens only on press-and-hold or keyboard", async ({ page }) =>
   await page.waitForTimeout(1000);
   await page.mouse.up();
   await expect(dialog).toBeVisible();
+  await expect(hint).toBeHidden(); // a successful hold must not leave the hint behind
   await page.getByRole("button", { name: "Schließen" }).click();
   await expect(dialog).not.toBeVisible();
 

@@ -7,6 +7,7 @@ import { SONGS, SONG_KEYS, type SongKey } from "./songs";
 import { OPT_DEFAULTS, clearAll, loadCal, loadOpts, saveCal, saveOpts } from "./storage";
 import { $, button, input } from "./ui/dom";
 import { highlightBar, renderInstrument, strikeBar } from "./ui/instrument";
+import { renderStaff } from "./ui/staff";
 import { sparkle } from "./ui/sparkle";
 
 type Mode = "home" | "play";
@@ -86,7 +87,7 @@ function stopSong(): boolean {
 
 function setMode(m: Mode): void {
   mode = m;
-  document.body.className = m;
+  document.body.className = m + (opts.staff ? " notation" : "");
   $("title").textContent = m === "home" ? "🎵 Mein Glockenspiel" : `${song().icon} ${song().title}`;
 }
 
@@ -148,6 +149,7 @@ function show(): void {
     $("syl").style.display = "block";
     showBar(n);
     highlightBar($("instrument"), n);
+    renderStaff($("staff"), n, null);
     $("colname").textContent = COL[n].name + (highTwin(n) ? " links" : "");
     $("syl").textContent = `Kalibrieren ${calIdx + 1}/${ORDER.length}`;
     $("hint").textContent = "Schlag diesen Stab einzeln an (Kreis antippen = überspringen)";
@@ -163,6 +165,7 @@ function show(): void {
   $("syl").style.display = x ? "block" : "none";
   dots.forEach((d, i) => (d.className = "dot" + (i < idx ? " done" : "") + (i === idx ? " cur" : "")));
   highlightBar($("instrument"), x ? x.n : null);
+  renderStaff($("staff"), x ? x.n : null, notes[idx + 1]?.n ?? null);
   if (!x) {
     $("hint").textContent = "";
     $("next").innerHTML = "";
@@ -352,6 +355,7 @@ function openSettings(): void {
   $("setMsg").textContent = "";
   input("optAuto").checked = opts.auto;
   input("optSpeak").checked = opts.speak;
+  input("optStaff").checked = opts.staff;
   updateCalUI();
   $<HTMLDialogElement>("settings").showModal();
 }
@@ -430,12 +434,18 @@ function wire(): void {
 
   // Parent area: press and hold the gear for ~0.8 s, so the child can't open it by accident (keyboard: Enter).
   const gear = button("settingsBtn");
+  const gearHint = $("gearhint");
   let gearT = 0;
+  let gearHintT = 0;
+  let opened = false;
   gear.addEventListener("pointerdown", () => {
+    opened = false;
+    gearHint.hidden = true;
     gear.classList.add("hold");
     clearTimeout(gearT);
     gearT = window.setTimeout(() => {
       gear.classList.remove("hold");
+      opened = true;
       openSettings();
     }, 800);
   });
@@ -446,7 +456,14 @@ function wire(): void {
     });
   }
   gear.addEventListener("click", (e) => {
-    if (e.detail === 0) openSettings();
+    if (e.detail === 0) {
+      openSettings(); // keyboard
+    } else if (!opened) {
+      // A short tap does nothing on purpose; say how to open the parent area instead of staying silent.
+      gearHint.hidden = false;
+      clearTimeout(gearHintT);
+      gearHintT = window.setTimeout(() => (gearHint.hidden = true), 3000);
+    }
   });
   gear.addEventListener("contextmenu", (e) => e.preventDefault());
 
@@ -462,6 +479,11 @@ function wire(): void {
     opts.speak = input("optSpeak").checked;
     saveOpts(opts);
   };
+  input("optStaff").onchange = () => {
+    opts.staff = input("optStaff").checked;
+    saveOpts(opts);
+    document.body.classList.toggle("notation", opts.staff);
+  };
   button("calreset").onclick = () => {
     cal = null;
     saveCal(cal);
@@ -474,6 +496,8 @@ function wire(): void {
     opts = { ...OPT_DEFAULTS };
     input("optAuto").checked = opts.auto;
     input("optSpeak").checked = opts.speak;
+    input("optStaff").checked = opts.staff;
+    document.body.classList.toggle("notation", opts.staff);
     updateCalUI();
     $("setMsg").textContent = "Alle gespeicherten Daten gelöscht.";
   };
