@@ -192,7 +192,7 @@ function renderTrack(): void {
     const d = document.createElement("div");
     d.className = "dot";
     if (i > 0 && x.line !== notes[i - 1]?.line) d.style.marginLeft = "14px";
-    d.innerHTML = `<div class="c" style="background:${COL[x.n].hex}">${label(x.n) + (isHigh(x.n) ? "*" : "")}</div><div class="t">${x.s}</div>`;
+    d.innerHTML = `<div class="c" data-note="${x.n}" style="background:${COL[x.n].hex}">${label(x.n) + (isHigh(x.n) ? "*" : "")}</div><div class="t">${x.s}</div>`;
     d.onclick = () => {
       stopSong();
       idx = i;
@@ -213,6 +213,7 @@ function show(): void {
   const dots = [...$("track").children] as HTMLElement[];
   if (calIdx >= 0) {
     const n = ORDER[calIdx] as NoteName;
+    document.body.classList.remove("finished");
     $("done").style.display = "none";
     $("big").style.display = "flex";
     $("colname").style.display = "block";
@@ -229,6 +230,8 @@ function show(): void {
   }
   const notes = song().notes;
   const x = notes[idx];
+  // The finish screen hides the competing controls (see style.css).
+  document.body.classList.toggle("finished", !x);
   $("done").style.display = x ? "none" : "flex";
   $("big").style.display = x ? "flex" : "none";
   $("colname").style.display = x ? "block" : "none";
@@ -248,7 +251,7 @@ function show(): void {
   $("syl").textContent = x.s;
   const nx = notes[idx + 1];
   $("next").innerHTML = nx
-    ? `<span>${t("next.label")}</span><span class="nd" style="background:${COL[nx.n].hex}">${label(nx.n)}</span>`
+    ? `<span>${t("next.label")}</span><span class="nd" data-note="${nx.n}" style="background:${COL[nx.n].hex}">${label(nx.n)}</span>`
     : "";
   const cur = dots[idx];
   if (cur) {
