@@ -1,4 +1,5 @@
 import { DEFAULT_SPEED, isSpeed, type Speed } from "./audio/speed";
+import { detectLang, isLang, type Lang } from "./i18n";
 import { normalizeCalibration, type Calibration } from "./mic/detect";
 
 // Previews live on the same origin as the live site, so they get their own keys (the live site keeps the
@@ -16,13 +17,19 @@ export interface Options {
   staff: boolean;
   /** Speed of ▶ (whole song), as a factor of the song's tempo. */
   speed: Speed;
+  /** UI language (songs keep their own language). */
+  lang: Lang;
 }
+
+/** Language of the browser if supported, English otherwise. */
+const browserLang = (): Lang => detectLang(typeof navigator === "undefined" ? [] : navigator.languages);
 
 export const OPT_DEFAULTS: Readonly<Options> = {
   auto: false,
   speak: false,
   staff: false,
   speed: DEFAULT_SPEED,
+  lang: browserLang(),
 };
 
 // localStorage can throw (private mode, quota, disabled storage); the app must keep working without it.
@@ -53,6 +60,7 @@ export function loadOpts(): Options {
       speak: typeof r.speak === "boolean" ? r.speak : OPT_DEFAULTS.speak,
       staff: typeof r.staff === "boolean" ? r.staff : OPT_DEFAULTS.staff,
       speed: isSpeed(r.speed) ? r.speed : OPT_DEFAULTS.speed,
+      lang: isLang(r.lang) ? r.lang : OPT_DEFAULTS.lang,
     };
   } catch {
     return { ...OPT_DEFAULTS };

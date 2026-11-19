@@ -13,6 +13,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}/Glockenspiel/`,
     trace: "retain-on-failure",
+    // The existing tests check the German UI. i18n.spec.ts overrides the locale.
+    locale: "de-DE",
     ...devices["Desktop Chrome"],
     // Grant the microphone without a prompt; the fake capture device plays silence (see fixtures.ts).
     launchOptions: {

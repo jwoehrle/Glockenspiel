@@ -1,6 +1,18 @@
 import { bell } from "./audio/bell";
 import { SongPlayer } from "./audio/player";
 import { DEFAULT_SPEED, faster, isFastest, isSlowest, slower, type Speed } from "./audio/speed";
+import {
+  LANG_INFO,
+  type Lang,
+  applyStatic,
+  barName,
+  getLang,
+  isLang,
+  setLang,
+  t,
+  type MessageKey,
+  type Params,
+} from "./i18n";
 import { calibrationPeak, judge, type Calibration } from "./mic/detect";
 import { Mic, canMic } from "./mic/mic";
 import { COL, FREQ, ORDER, highTwin, isHigh, label, type NoteName } from "./notes";
@@ -26,6 +38,25 @@ let opts = loadOpts();
 let announceT = 0;
 let annId = 0;
 let micFailed = false;
+setLang(opts.lang);
+
+// ---------- translated dynamic text ----------
+// Texts set from code are remembered by element id, so they can be translated again when the language changes.
+const dynamic = new Map<string, [MessageKey, Params | undefined]>();
+
+function say(id: string, key: MessageKey, params?: Params): void {
+  dynamic.set(id, [key, params]);
+  $(id).textContent = t(key, params);
+}
+
+function clearText(id: string): void {
+  dynamic.delete(id);
+  $(id).textContent = "";
+}
+
+function refreshDynamic(): void {
+  for (const [id, [key, params]] of dynamic) $(id).textContent = t(key, params);
+}
 
 const song = () => SONGS[songKey];
 
@@ -45,7 +76,7 @@ const player = new SongPlayer();
 function setPlayingUI(on: boolean): void {
   const b = button("playsong");
   b.textContent = on ? "⏹" : "▶";
-  b.title = b.ariaLabel = on ? "Vorspielen stoppen" : "Ganzes Lied vorspielen";
+  b.title = b.ariaLabel = t(on ? "play.stop" : "play.song");
   b.classList.toggle("playing", on);
 }
 
@@ -127,7 +158,7 @@ function stopSong(): boolean {
 function setMode(m: Mode): void {
   mode = m;
   document.body.className = m + (opts.staff ? " notation" : "");
-  $("title").textContent = m === "home" ? "🎵 Mein Glockenspiel" : `${song().icon} ${song().title}`;
+  $("title").textContent = m === "home" ? `🎵 ${t("app.title")}` : `${song().icon} ${song().title}`;
 }
 
 function renderSongs(): void {
@@ -189,9 +220,9 @@ function show(): void {
     showBar(n);
     highlightBar($("instrument"), n);
     renderStaff($("staff"), n, null);
-    $("colname").textContent = COL[n].name + (highTwin(n) ? " links" : "");
-    $("syl").textContent = `Kalibrieren ${calIdx + 1}/${ORDER.length}`;
-    $("hint").textContent = "Schlag diesen Stab einzeln an (Kreis antippen = überspringen)";
+    $("colname").textContent = barName(n, highTwin(n) !== null);
+    $("syl").textContent = t("cal.progress", { n: calIdx + 1, total: ORDER.length });
+    say("hint", "cal.hintStrike");
     dots.forEach((d) => (d.className = "dot done"));
     $("next").innerHTML = "";
     return;
@@ -206,18 +237,18 @@ function show(): void {
   highlightBar($("instrument"), x ? x.n : null);
   renderStaff($("staff"), x ? x.n : null, notes[idx + 1]?.n ?? null);
   if (!x) {
-    $("hint").textContent = "";
+    clearText("hint");
     $("next").innerHTML = "";
     return;
   }
   showBar(x.n);
   // Same color exists left and right: say "links" if the song also needs the high bar.
   const twin = highTwin(x.n);
-  $("colname").textContent = COL[x.n].name + (twin && notes.some((y) => y.n === twin) ? " links" : "");
+  $("colname").textContent = barName(x.n, !!twin && notes.some((y) => y.n === twin));
   $("syl").textContent = x.s;
   const nx = notes[idx + 1];
   $("next").innerHTML = nx
-    ? `<span>danach</span><span class="nd" style="background:${COL[nx.n].hex}">${label(nx.n)}</span>`
+    ? `<span>${t("next.label")}</span><span class="nd" style="background:${COL[nx.n].hex}">${label(nx.n)}</span>`
     : "";
   const cur = dots[idx];
   if (cur) {
@@ -277,7 +308,7 @@ function announce(): void {
       ring();
     };
     const u = new SpeechSynthesisUtterance($("colname").textContent ?? "");
-    u.lang = "de-DE";
+    u.lang = LANG_INFO[getLang()].speech;
     u.rate = 0.9;
     u.onend = go;
     u.onerror = go;
@@ -314,14 +345,13 @@ async function startMic(): Promise<boolean> {
     await mic.start();
     button("mic").className = "listening";
     $("meter").style.display = "block";
-    $("hint").textContent = "Ich höre zu – spiel den Ton!";
+    say("hint", "mic.listening");
     return true;
   } catch {
     micFailed = true;
     button("mic").style.display = "none";
     $("foot").style.display = "block";
-    $("foot").innerHTML =
-      "Das Mikrofon ist hier nicht erlaubt. Öffne die Seite im Browser (z.&nbsp;B. Chrome), dann hört die App zu. Bis dahin: großen Kreis antippen.";
+    say("foot", "mic.denied");
     return false;
   }
 }
@@ -331,7 +361,7 @@ function stopMic(): void {
   mic.stop();
   button("mic").className = "primary";
   $("meter").style.display = "none";
-  $("hint").textContent = "";
+  clearText("hint");
 }
 
 function strike(fs: number[]): void {
@@ -349,23 +379,22 @@ function strike(fs: number[]): void {
 
 // ---------- calibration ----------
 function updateCalUI(): void {
-  button("cal").textContent =
-    calIdx >= 0 ? "✖ Kalibrierung abbrechen" : cal ? "🎯 Neu kalibrieren" : "🎯 Kalibrieren";
+  button("cal").textContent = t(calIdx >= 0 ? "set.calStop" : cal ? "set.calAgain" : "set.cal");
   button("cal").className = calIdx >= 0 ? "calon" : "";
   button("calreset").disabled = !cal;
   $("calcancel").style.display = calIdx >= 0 ? "block" : "none";
-  $("calState").textContent = cal ? "Kalibrierung gespeichert." : "Keine Kalibrierung gespeichert.";
+  $("calState").textContent = t(cal ? "set.calSaved" : "set.calNone");
 }
 
 function calHit(fs: number[]): void {
   const n = ORDER[calIdx] as NoteName;
   const f = calibrationPeak(fs, n);
   if (f === undefined) {
-    $("hint").textContent = "Nicht erkannt – nochmal anschlagen";
+    say("hint", "cal.notHeard");
     return;
   }
   calTmp[n] = f;
-  $("hint").textContent = `${Math.round(f)} Hz ✓`;
+  say("hint", "cal.heard", { hz: Math.round(f) });
   setTimeout(calAdvance, 350);
 }
 
@@ -386,12 +415,13 @@ function endCal(ok: boolean): void {
   }
   updateCalUI();
   show();
-  $("hint").textContent = ok ? "Kalibriert ✓ – die App erkennt jetzt dein Glockenspiel." : "";
+  if (ok) say("hint", "cal.done");
+  else clearText("hint");
 }
 
 // ---------- parent area ----------
 function openSettings(): void {
-  $("setMsg").textContent = "";
+  clearText("setMsg");
   input("optAuto").checked = opts.auto;
   input("optSpeak").checked = opts.speak;
   input("optStaff").checked = opts.staff;
@@ -399,8 +429,38 @@ function openSettings(): void {
   $<HTMLDialogElement>("settings").showModal();
 }
 
+/** Show the UI in `lang`; optionally remember the choice. */
+function changeLanguage(lang: Lang, save = true): void {
+  opts.lang = lang;
+  if (save) saveOpts(opts);
+  setLang(lang);
+  applyLanguage();
+}
+
+/** Translate everything: static markup, texts set from code, and the parts that are redrawn. */
+function applyLanguage(): void {
+  const preview = import.meta.env.VITE_PREVIEW;
+  applyStatic(preview);
+  input("lang").value = getLang();
+  if (preview) {
+    $("preview").textContent = t("preview.label", { name: preview });
+    $("preview").hidden = false;
+  }
+  renderInstrument($("instrument"), tapBar);
+  setPlayingUI(player.playing);
+  setMode(mode);
+  updateCalUI();
+  refreshDynamic();
+  show();
+}
+
 function wire(): void {
   const settings = $<HTMLDialogElement>("settings");
+
+  const langSelect = $<HTMLSelectElement>("lang");
+  langSelect.onchange = () => {
+    if (isLang(langSelect.value)) changeLanguage(langSelect.value);
+  };
 
   // Tapping the circle plays the current note and moves on (playing without a real glockenspiel).
   $("big").onclick = () => {
@@ -530,7 +590,7 @@ function wire(): void {
     cal = null;
     saveCal(cal);
     updateCalUI();
-    $("setMsg").textContent = "Kalibrierung gelöscht.";
+    say("setMsg", "set.calDeleted");
   };
   button("clearall").onclick = () => {
     clearAll();
@@ -540,19 +600,18 @@ function wire(): void {
     input("optSpeak").checked = opts.speak;
     input("optStaff").checked = opts.staff;
     document.body.classList.toggle("notation", opts.staff);
+    changeLanguage(opts.lang, false);
     updateSpeedUI();
     updateCalUI();
-    $("setMsg").textContent = "Alle gespeicherten Daten gelöscht.";
+    say("setMsg", "set.cleared");
   };
 }
 
 export function init(): void {
   wire();
-  renderInstrument($("instrument"), tapBar);
   updateSpeedUI();
-  updateCalUI();
   setMode("home");
   renderSongs();
   renderTrack();
-  show();
+  applyLanguage();
 }
