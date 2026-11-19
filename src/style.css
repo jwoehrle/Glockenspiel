@@ -95,6 +95,22 @@ body.home h1 {
     transform 0.8s,
     opacity 0.8s;
 }
+.gearhint {
+  position: fixed;
+  top: 46px;
+  right: 6px;
+  z-index: 5;
+  max-width: 220px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+  pointer-events: none;
+}
+.gearhint[hidden] {
+  display: none;
+}
 .gear.hold {
   transform: rotate(180deg) scale(1.3);
   opacity: 0.9;

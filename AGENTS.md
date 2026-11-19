@@ -88,7 +88,7 @@ Stop dev/preview servers when done.
   pre-build era). Served at `/Glockenspiel/sw.js`, the same URL as the old hand-written worker.
 - `vite.config.ts`: `base: "/Glockenspiel/"`, PWA manifest, Vitest config. `public/icons/`: app icons.
 - Parent area: `<dialog id="settings">`, opened by **press-and-hold (~0.8 s)** on the faint ⚙ top-right (keyboard:
-  Enter), so the child can't open it by accident.
+  Enter), so the child can't open it by accident. A short click shows a hint ("⚙ Zum Öffnen gedrückt halten", `#gearhint`, 3 s) instead of doing nothing.
 
 ## Tests
 

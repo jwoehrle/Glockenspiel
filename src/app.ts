@@ -434,12 +434,18 @@ function wire(): void {
 
   // Parent area: press and hold the gear for ~0.8 s, so the child can't open it by accident (keyboard: Enter).
   const gear = button("settingsBtn");
+  const gearHint = $("gearhint");
   let gearT = 0;
+  let gearHintT = 0;
+  let opened = false;
   gear.addEventListener("pointerdown", () => {
+    opened = false;
+    gearHint.hidden = true;
     gear.classList.add("hold");
     clearTimeout(gearT);
     gearT = window.setTimeout(() => {
       gear.classList.remove("hold");
+      opened = true;
       openSettings();
     }, 800);
   });
@@ -450,7 +456,14 @@ function wire(): void {
     });
   }
   gear.addEventListener("click", (e) => {
-    if (e.detail === 0) openSettings();
+    if (e.detail === 0) {
+      openSettings(); // keyboard
+    } else if (!opened) {
+      // A short tap does nothing on purpose; say how to open the parent area instead of staying silent.
+      gearHint.hidden = false;
+      clearTimeout(gearHintT);
+      gearHintT = window.setTimeout(() => (gearHint.hidden = true), 3000);
+    }
   });
   gear.addEventListener("contextmenu", (e) => e.preventDefault());
 
