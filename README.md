@@ -1,8 +1,7 @@
 # Mein Glockenspiel
 
 A small web app for learning songs on a children's glockenspiel (Sonor GS Toysound: eleven bars, c3–f4 in C major:
-C D E F G A H c d e f). The three highest bars (d e f) have the same colors as the low D E F, and the high c matches
-the low C. It shows the next color/note and listens through the microphone to check whether the right bar was struck.
+C D E F G A H c d e f). The four highest bars (c d e f) have the same colors as the low C D E F. It shows the next color/note and listens through the microphone to check whether the right bar was struck.
 
 - Live: https://jwoehrle.github.io/Glockenspiel/
 - Installable as an app (PWA) and usable offline.
@@ -59,12 +58,16 @@ src/app.ts            UI flow, calibration, parent area
 src/notes.ts          the eleven bars: colors, names, MIDI numbers, frequencies
 src/songs.ts          song data
 src/mic/              microphone, onset detection, pitch analysis, matching
-src/audio/bell.ts     synthesized bell tone
+src/audio/            bell tone (bell.ts), song playback (player.ts), playback speeds (speed.ts)
+src/ui/               DOM helpers, glockenspiel picture, staff notation, sparkles
+src/style.css         all styles, including the responsive layouts
 src/storage.ts        localStorage (calibration, options)
 src/sw.ts             service worker (offline)
 public/icons/         app icons
+scripts/              helpers for the gh-pages layout tests
 tests/unit/           Vitest
-tests/e2e/            Playwright
+tests/e2e/            Playwright (production build)
+tests/e2e-preview/    Playwright (live site + PR preview in the gh-pages layout)
 ```
 
 ## Usage
@@ -76,7 +79,7 @@ tests/e2e/            Playwright
 - **On a tablet or laptop**, the whole glockenspiel is shown below the circle (portrait) or beside it (landscape), and
   the bar to strike pops out.
   Tap the bars to play the song on the screen: the right bar moves on, a wrong one only wobbles.
-- **Parent area:** press and hold the ⚙ in the top-right corner for about 1 second. It contains: autoplay, read the
+- **Parent area:** press and hold the ⚙ in the top-right corner for about 0.8 seconds. It contains: autoplay, read the
   color aloud, staff notation (_Noten anzeigen_: the current and next note in a treble clef left of the circle, on
   tablets and laptops), microphone sensitivity, one note back, calibration, and clearing saved data.
 
@@ -98,7 +101,7 @@ meinlied: {
   notes: build(
     [
       "Line-|C one|D here|E",
-      "Line-|F two|G now|AB", // two letters = two notes on one syllable
+      "Line-|F two|G now|GA", // two letters = two notes on one syllable
     ],
     [
       "4 4 2", // one length per note

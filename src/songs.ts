@@ -151,7 +151,7 @@ export const SONGS = {
       ],
     ),
   },
-  // Alle drei Lieder liegen komplett im Bereich C–c (Noten aus Notenblatt/MIDI in C-Dur übernommen).
+  // The next three songs stay within C–c (notes taken from the sheet music / MIDI in C major).
   jahre: {
     icon: "🎄",
     title: "Alle Jahre wieder",
@@ -185,7 +185,7 @@ export const SONGS = {
       ],
     ),
   },
-  // Hinweis: In der Strophe „Öffnet mir die Türen“ steht im Original ein Fis (nicht auf dem Glockenspiel) – hier als F gespielt.
+  // Note: in the verse "Öffnet mir die Türen" the original has an F♯ (not on the glockenspiel); it is played as F here.
   kling: {
     icon: "🔔",
     title: "Kling, Glöckchen",
@@ -206,7 +206,7 @@ export const SONGS = {
       ],
     ),
   },
-  // Ab hier in G-Dur gespielt (ohne Fis), nutzt die hohen Stäbe d e. Noten aus Wikibooks-/Wikipedia-LilyPond.
+  // From here on the songs are played in G major (no F♯) and use the high bars. Notes from Wikibooks/Wikipedia LilyPond.
   jakob: {
     icon: "😴",
     title: "Bruder Jakob",
@@ -222,7 +222,7 @@ export const SONGS = {
       ["4 4 4 4 4 4 4 4", "4 4 2 4 4 2", "8 8 8 8 4 4 8 8 8 8 4 4", "4 4 2 4 4 2"],
     ),
   },
-  // Beethoven/Schiller. „al-“ ist im Original übergebunden (Synkope) – hier nur einmal angeschlagen.
+  // Beethoven/Schiller. "al-" is tied in the original (syncopation); it is struck only once here.
   freude: {
     icon: "🎆",
     title: "Freude, schöner Götterfunken",
