@@ -1,3 +1,4 @@
+import { DEFAULT_SPEED, isSpeed, type Speed } from "./audio/speed";
 import { normalizeCalibration, type Calibration } from "./mic/detect";
 
 // Previews live on the same origin as the live site, so they get their own keys (the live site keeps the
@@ -13,9 +14,16 @@ export interface Options {
   speak: boolean;
   /** Show the current note in staff notation next to the circle. */
   staff: boolean;
+  /** Speed of ▶ (whole song), as a factor of the song's tempo. */
+  speed: Speed;
 }
 
-export const OPT_DEFAULTS: Readonly<Options> = { auto: false, speak: false, staff: false };
+export const OPT_DEFAULTS: Readonly<Options> = {
+  auto: false,
+  speak: false,
+  staff: false,
+  speed: DEFAULT_SPEED,
+};
 
 // localStorage can throw (private mode, quota, disabled storage); the app must keep working without it.
 
@@ -44,6 +52,7 @@ export function loadOpts(): Options {
       auto: typeof r.auto === "boolean" ? r.auto : OPT_DEFAULTS.auto,
       speak: typeof r.speak === "boolean" ? r.speak : OPT_DEFAULTS.speak,
       staff: typeof r.staff === "boolean" ? r.staff : OPT_DEFAULTS.staff,
+      speed: isSpeed(r.speed) ? r.speed : OPT_DEFAULTS.speed,
     };
   } catch {
     return { ...OPT_DEFAULTS };

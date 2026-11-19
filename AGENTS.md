@@ -72,6 +72,9 @@ Stop dev/preview servers when done.
   `playSong()`/`stopSong()` in `app.ts`: ▶ plays the whole song from the start; circle, track and glockenspiel
   follow every note; the microphone is muted; any other interaction (circle, bar, track, 🔊, 🔁, 🏠, calibration)
   stops it. Afterwards the song is back at the first note.
+- `src/audio/speed.ts` (pure): `SPEEDS` ½× ¾× 1× 1¼× 1½×, `slower`/`faster` (stop at the ends), `speedLabel`. Saved in the
+  options as `speed`. ▶ plays at `bpm × speed`. Changing the speed during playback does **not** stop it (the one
+  exception to "any interaction stops it"): the song goes on at the new tempo with the next note (`scheduleFrom`).
 - `src/storage.ts`: `localStorage` keys `glock-cal` (calibration) and `glock-opts` (options); never throws.
 - `src/ui/instrument.ts`: the whole glockenspiel under the circle (`renderInstrument`, `highlightBar`,
   `strikeBar`); the bar to strike pops out, and the bars are buttons (`tapBar` in `app.ts`). Two layouts in
@@ -132,11 +135,11 @@ Stop dev/preview servers when done.
 ## UI decisions to preserve
 
 - Large, icon-based, minimal start screen (song tiles only). Tapping a tile starts the song and turns the mic on.
-- Controls are icon-only (🏠 🎤 🔊 ▶/⏹) plus a big yellow "🔁 Von vorn". ▶ plays the whole song in rhythm. The finish screen has a big "🔁 Nochmal!".
+- Controls are icon-only (🏠 🎤 🔊 ▶/⏹, and the speed of ▶: 🐌 slower, a button showing the speed that resets to 1×, 🏎 faster) plus a big yellow "🔁 Von vorn". ▶ plays the whole song in rhythm. The finish screen has a big "🔁 Nochmal!".
 - **Every song tile needs a unique icon that is not used elsewhere in the UI** (enforced by a unit test). Current:
   🥜 Lasst uns froh und munter sein, ❄ Jingle Bells, 🎅 Morgen kommt der Weihnachtsmann, 🎄 Alle Jahre wieder,
   👶 Ihr Kinderlein, 🔔 Kling, Glöckchen, 😴 Bruder Jakob, 🎆 Freude, schöner Götterfunken. Avoid 🔊 🎤 🏠 🔁 ⚙ 🎵 ▶ ⏹
-  and the praise sparkles ⭐ ✨ 🌟.
+  🐌 🏎 and the praise sparkles ⭐ ✨ 🌟.
 - Autoplay, read-aloud and staff notation are options in the parent area, all **off by default**.
 - Playing without a real glockenspiel: tapping a bar of the on-screen glockenspiel plays its tone and is judged
   like a real strike (right bar → next note, wrong bar → wobble only). Tapping the big circle plays the current

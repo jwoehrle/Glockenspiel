@@ -719,6 +719,32 @@ footer {
   }
 }
 
+/* speed of "play the whole song": 🐌 slower, normal speed (shows the current speed), 🏎 faster */
+.controls .speed {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.controls .speed button {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  font-size: 28px;
+}
+.controls .speed button#speed {
+  width: auto;
+  min-width: 56px;
+  padding: 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+.controls .speed button#speed.changed {
+  background: #f2b63c;
+}
+.controls .speed button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
 /* "play the whole song" button */
 .controls button#playsong {
   color: var(--ink);
