@@ -4,27 +4,29 @@
 export const ORDER = ["C", "D", "E", "F", "G", "A", "H", "c", "d", "e", "f"] as const;
 export type NoteName = (typeof ORDER)[number];
 
+export type ColorKey = "green" | "brown" | "red" | "yellow" | "grey" | "blue" | "lilac";
+
 export interface Bar {
   /** Bar color as CSS hex. */
   hex: string;
-  /** German color name, read aloud and shown under the circle. */
-  name: string;
+  /** Color key; the name in the UI language comes from i18n (`color.<key>`). */
+  color: ColorKey;
   /** MIDI note number of the bar (C = c3 = 1046.5 Hz = MIDI 84). Detection checks pitch AND octave. */
   midi: number;
 }
 
 export const COL: Readonly<Record<NoteName, Bar>> = {
-  C: { hex: "#3F6B47", name: "Grün", midi: 84 },
-  D: { hex: "#5B4239", name: "Braun", midi: 86 },
-  E: { hex: "#B4504B", name: "Rot", midi: 88 },
-  F: { hex: "#F2B63C", name: "Gelb", midi: 89 },
-  G: { hex: "#9AA6B2", name: "Grau", midi: 91 },
-  A: { hex: "#2B9BD9", name: "Blau", midi: 93 },
-  H: { hex: "#8E5E9E", name: "Lila", midi: 95 },
-  c: { hex: "#3F6B47", name: "Grün rechts", midi: 96 },
-  d: { hex: "#5B4239", name: "Braun rechts", midi: 98 },
-  e: { hex: "#B4504B", name: "Rot rechts", midi: 100 },
-  f: { hex: "#F2B63C", name: "Gelb rechts", midi: 101 },
+  C: { hex: "#3F6B47", color: "green", midi: 84 },
+  D: { hex: "#5B4239", color: "brown", midi: 86 },
+  E: { hex: "#B4504B", color: "red", midi: 88 },
+  F: { hex: "#F2B63C", color: "yellow", midi: 89 },
+  G: { hex: "#9AA6B2", color: "grey", midi: 91 },
+  A: { hex: "#2B9BD9", color: "blue", midi: 93 },
+  H: { hex: "#8E5E9E", color: "lilac", midi: 95 },
+  c: { hex: "#3F6B47", color: "green", midi: 96 },
+  d: { hex: "#5B4239", color: "brown", midi: 98 },
+  e: { hex: "#B4504B", color: "red", midi: 100 },
+  f: { hex: "#F2B63C", color: "yellow", midi: 101 },
 };
 
 export const midiToFreq = (midi: number): number => 440 * Math.pow(2, (midi - 69) / 12);

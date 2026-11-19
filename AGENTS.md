@@ -29,8 +29,9 @@ Hosted on GitHub Pages, installable as a PWA.
 - **Before any push, run the full test suite locally, including the Playwright e2e tests**
   (`npm run check && npm run test:e2e && npm run test:e2e:preview`).
 - **Never rewrite git history or force-push without an explicit request.** (It was done once, deliberately, to remove a personal name.)
-- **Privacy:** the app and repo must not contain the child's name or other personal details. Keep text generic ("Mein Glockenspiel", "Super gemacht!").
-- UI text is **German**; everything else (code, identifiers, comments, tests, commit messages, docs) is **English**. See `.kiro/steering/tech.md`.
+- **Privacy:** the app and repo must not contain the child's name or other personal details. Keep text generic ("My Glockenspiel", "Well done!").
+- The UI is **English and German** (`src/i18n.ts`); song titles and lyrics are not translated. Everything else (code,
+  identifiers, comments, tests, commit messages, docs) is **English**. See `.kiro/steering/tech.md`.
 - The default language is **English**. Answer in German only when the user writes in German.
 - No manual cache version bump is needed anymore: the service worker precaches hashed assets, and a new build produces a new worker.
 
@@ -75,6 +76,12 @@ Stop dev/preview servers when done.
 - `src/audio/speed.ts` (pure): `SPEEDS` ½× ¾× 1× 1¼× 1½×, `slower`/`faster` (stop at the ends). Saved in the
   options as `speed`. ▶ plays at `bpm × speed`. Changing the speed during playback does **not** stop it (the one
   exception to "any interaction stops it"): the song goes on at the new tempo with the next note (`scheduleFrom`).
+- `src/i18n.ts`: `en`/`de` message tables, `t(key, params)`, `barName()` (color name incl. "left"/"right"),
+  `applyStatic()` (fills `data-i18n`, `data-i18n-title`, `data-i18n-label` elements, `<html lang>`, title,
+  description), `detectLang()`. Texts set from code use `say(id, key)` in `app.ts`, which remembers them so a language
+  switch re-translates them (`applyLanguage()`). The `<select id="lang">` (flags 🇬🇧 🇩🇪) sits left of the ⚙; the choice
+  is saved in the options (`lang`), the default comes from `navigator.languages`. The web app manifest stays
+  German-only (it is static). Speech uses `en-GB` or `de-DE`.
 - `src/storage.ts`: `localStorage` keys `glock-cal` (calibration) and `glock-opts` (options); never throws.
 - `src/ui/instrument.ts`: the whole glockenspiel under the circle (`renderInstrument`, `highlightBar`,
   `strikeBar`); the bar to strike pops out, and the bars are buttons (`tapBar` in `app.ts`). Two layouts in
@@ -99,8 +106,11 @@ Stop dev/preview servers when done.
 - `tests/unit/*.test.ts` (Vitest): song data (valid bars, unique icons/titles, exact sequences of verified songs),
   `build()`, bars/frequencies, pitch math, peak picking on synthetic spectra, `judge()` incl. octave-specific
   matching and calibration, onset detector timing, playback schedule (`player.test.ts`), speed steps
-  (`speed.test.ts`), staff steps and ledger lines (`staff.test.ts`).
-- `tests/e2e/*.spec.ts` (Playwright, Chromium, against the production build):
+  (`speed.test.ts`), staff steps and ledger lines (`staff.test.ts`), translations (`i18n.test.ts`).
+- `tests/e2e/*.spec.ts` (Playwright, Chromium, against the production build). The configs set the browser locale to
+  `de-DE`, because most tests look for German UI text:
+  - `i18n.spec.ts`: default language from the browser (en, de, fallback), switching with the flag drop-down changes
+    the UI but not the songs, an open song and the parent area are re-translated, the choice survives a reload.
   - `ui.spec.ts`: start screen, playing through a song, finish screen, controls, low/high bar labels, parent area
     press-and-hold, options persistence, loading an old eight-bar calibration.
   - `mic.spec.ts`: **real microphone detection** with Chromium's fake capture device fed by synthetic WAV recordings

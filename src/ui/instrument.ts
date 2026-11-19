@@ -1,3 +1,4 @@
+import { barName } from "../i18n";
 import { COL, ORDER, isHigh, label, type NoteName } from "../notes";
 
 /** Bar lengths shrink towards the high end, like on the real instrument (100 % → 72 %). */
@@ -14,7 +15,7 @@ export function renderInstrument(box: HTMLElement, onTap: (n: NoteName) => void)
     bar.type = "button";
     bar.className = "bar";
     bar.dataset.note = n;
-    bar.setAttribute("aria-label", COL[n].name);
+    bar.setAttribute("aria-label", barName(n));
     bar.style.background = COL[n].hex;
     bar.style.height = `${barLength(i)}%`;
     bar.innerHTML = `<i></i><i></i><span>${label(n)}${isHigh(n) ? "★" : ""}</span>`;

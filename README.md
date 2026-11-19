@@ -54,7 +54,8 @@ Notes:
 ```
 index.html            markup (Vite entry)
 src/main.ts           entry: styles, app init, service worker registration
-src/app.ts            UI flow, calibration, parent area
+src/app.ts            UI flow, calibration, parent area, language switching
+src/i18n.ts           UI translations (English, German)
 src/notes.ts          the eleven bars: colors, names, MIDI numbers, frequencies
 src/songs.ts          song data
 src/mic/              microphone, onset detection, pitch analysis, matching
@@ -79,6 +80,9 @@ tests/e2e-preview/    Playwright (live site + PR preview in the gh-pages layout)
 - **On a tablet or laptop**, the whole glockenspiel is shown below the circle (portrait) or beside it (landscape), and
   the bar to strike pops out.
   Tap the bars to play the song on the screen: the right bar moves on, a wrong one only wobbles.
+- **Language:** the drop-down with the flag (🇬🇧 / 🇩🇪) left of the ⚙ switches the interface between English and
+  German. Song titles and lyrics stay as they are. The first visit uses the browser language (English if it is neither);
+  the choice is saved.
 - **Parent area:** press and hold the ⚙ in the top-right corner for about 0.8 seconds. It contains: autoplay, read the
   color aloud, staff notation (_Noten anzeigen_: the current and next note in a treble clef left of the circle, on
   tablets and laptops), microphone sensitivity, one note back, calibration, and clearing saved data.
@@ -88,6 +92,14 @@ tests/e2e-preview/    Playwright (live site + PR preview in the gh-pages layout)
 In the parent area, tap _Kalibrieren_ and strike the eleven bars one at a time. The app stores the measured
 frequencies and then checks against those (±50 cents) instead of standard tuning. For a normally tuned glockenspiel
 this isn't needed.
+
+## Translations
+
+All interface text lives in `src/i18n.ts` (one table per language). In `index.html`, mark an element with
+`data-i18n="key"` (text), `data-i18n-title="key"` or `data-i18n-label="key"` (`aria-label`); in code use
+`t("key", { param })`. Add every new key to both languages; the type checker fails if one is missing. To add a
+language, extend `LANGS` and `LANG_INFO` and add a table. Song titles and lyrics are data in `src/songs.ts` and are
+not translated.
 
 ## Adding songs
 

@@ -12,7 +12,9 @@ inclusion: always
 ## Language
 
 - All code, identifiers, comments, commit messages, tests and docs (`README.md`, `AGENTS.md`, steering) are in **English**.
-- Only user-visible UI text is **German** (the child's language).
+- The UI is available in **English and German** (`src/i18n.ts`). Song titles and lyrics are not translated.
+- Every user-visible string goes through `t()` or a `data-i18n*` attribute; add each new key to both languages.
+- Tests that check UI text run with the `de-DE` locale (see the Playwright configs); `tests/e2e/i18n.spec.ts` overrides it.
 - Reply to the user in the language they write in.
 
 ## Commands

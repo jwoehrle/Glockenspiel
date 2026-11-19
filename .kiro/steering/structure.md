@@ -11,6 +11,7 @@ inclusion: always
 - `src/mic/`: `pitch.ts`, `detect.ts`, `onset.ts` (pure logic) and `mic.ts` (getUserMedia loop).
 - `src/audio/`: `bell.ts` (tone), `player.ts` (song playback), `speed.ts` (tempo steps).
 - `src/ui/`: `dom.ts`, `instrument.ts`, `staff.ts`, `sparkle.ts`. Styles in `src/style.css`.
+- `src/i18n.ts`: UI translations (`en`, `de`), `t()`, `barName()`, `applyStatic()`. Markup uses `data-i18n`, `data-i18n-title`, `data-i18n-label`.
 - `src/storage.ts`: `localStorage` access, never throws.
 - `src/sw.ts`: service worker. `public/icons/`: app icons.
 - `tests/unit/`: Vitest. `tests/e2e/`: Playwright against the production build. `tests/e2e-preview/`: preview layout.

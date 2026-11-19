@@ -829,3 +829,23 @@ footer {
 .preview[hidden] {
   display: none;
 }
+
+/* language switcher: the flag of the selected language, left of the gear */
+.lang {
+  position: fixed;
+  top: 6px;
+  right: 46px;
+  height: 36px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.6;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.lang:focus-visible {
+  opacity: 1;
+}
