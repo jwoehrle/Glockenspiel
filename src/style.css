@@ -586,6 +586,13 @@ footer {
   body.play .stage > .done-box {
     grid-area: 1 / 1 / 7 / 3;
   }
+  /* Leave spare height so the page never scrolls, even where fonts render a bit taller (Linux). */
+  body.play {
+    padding-bottom: 8px;
+  }
+  body.play .controls {
+    margin-top: 10px;
+  }
 }
 @keyframes barstrike {
   0% {
