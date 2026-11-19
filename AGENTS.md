@@ -78,9 +78,9 @@ Stop dev/preview servers when done.
   exception to "any interaction stops it"): the song goes on at the new tempo with the next note (`scheduleFrom`).
 - `src/i18n.ts`: `en`/`de` message tables, `t(key, params)`, `barName()` (color name incl. "left"/"right"),
   `applyStatic()` (fills `data-i18n`, `data-i18n-title`, `data-i18n-label` elements, `<html lang>`, title,
-  description), `detectLang()`. Texts set from code use `say(id, key)` in `app.ts`, which remembers them so a language
+  description), Texts set from code use `say(id, key)` in `app.ts`, which remembers them so a language
   switch re-translates them (`applyLanguage()`). The `<select id="lang">` (flags 🇬🇧 🇩🇪) sits left of the ⚙; the choice
-  is saved in the options (`lang`), the default comes from `navigator.languages`. The web app manifest stays
+  is saved in the options (`lang`), German is the default (`DEFAULT_LANG`, not the browser language). The web app manifest stays
   German-only (it is static). Speech uses `en-GB` or `de-DE`.
 - `src/storage.ts`: `localStorage` keys `glock-cal` (calibration) and `glock-opts` (options); never throws.
 - `src/ui/instrument.ts`: the whole glockenspiel under the circle (`renderInstrument`, `highlightBar`,
@@ -107,9 +107,9 @@ Stop dev/preview servers when done.
   `build()`, bars/frequencies, pitch math, peak picking on synthetic spectra, `judge()` incl. octave-specific
   matching and calibration, onset detector timing, playback schedule (`player.test.ts`), speed steps
   (`speed.test.ts`), staff steps and ledger lines (`staff.test.ts`), translations (`i18n.test.ts`).
-- `tests/e2e/*.spec.ts` (Playwright, Chromium, against the production build). The configs set the browser locale to
-  `de-DE`, because most tests look for German UI text:
-  - `i18n.spec.ts`: default language from the browser (en, de, fallback), switching with the flag drop-down changes
+- `tests/e2e/*.spec.ts` (Playwright, Chromium, against the production build). Most tests look for German UI text, which
+  is the default:
+  - `i18n.spec.ts`: German is the default even in an English browser, switching with the flag drop-down changes
     the UI but not the songs, an open song and the parent area are re-translated, the choice survives a reload.
   - `ui.spec.ts`: start screen, playing through a song, finish screen, controls, low/high bar labels, parent area
     press-and-hold, options persistence, loading an old eight-bar calibration.

@@ -16,15 +16,8 @@ export const LANG_INFO: Readonly<Record<Lang, { flag: string; name: string; spee
   de: { flag: "🇩🇪", name: "Deutsch", speech: "de-DE" },
 };
 
-/** First supported language from the browser's preferences, English if none matches. */
-export function detectLang(preferred: readonly string[] = []): Lang {
-  for (const p of preferred) {
-    const base = p.toLowerCase().split("-")[0];
-    const hit = LANGS.find((l) => l === base);
-    if (hit) return hit;
-  }
-  return "en";
-}
+/** Language used until the user picks one. */
+export const DEFAULT_LANG: Lang = "de";
 
 const de = {
   "app.title": "Mein Glockenspiel",
@@ -148,7 +141,7 @@ const MESSAGES: Record<Lang, Record<MessageKey, string>> = { de, en };
 
 export type Params = Record<string, string | number>;
 
-let current: Lang = "en";
+let current: Lang = DEFAULT_LANG;
 
 export const getLang = (): Lang => current;
 export const setLang = (l: Lang): void => {

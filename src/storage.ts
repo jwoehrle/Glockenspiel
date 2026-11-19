@@ -1,5 +1,5 @@
 import { DEFAULT_SPEED, isSpeed, type Speed } from "./audio/speed";
-import { detectLang, isLang, type Lang } from "./i18n";
+import { DEFAULT_LANG, isLang, type Lang } from "./i18n";
 import { normalizeCalibration, type Calibration } from "./mic/detect";
 
 // Previews live on the same origin as the live site, so they get their own keys (the live site keeps the
@@ -21,15 +21,12 @@ export interface Options {
   lang: Lang;
 }
 
-/** Language of the browser if supported, English otherwise. */
-const browserLang = (): Lang => detectLang(typeof navigator === "undefined" ? [] : navigator.languages);
-
 export const OPT_DEFAULTS: Readonly<Options> = {
   auto: false,
   speak: false,
   staff: false,
   speed: DEFAULT_SPEED,
-  lang: browserLang(),
+  lang: DEFAULT_LANG,
 };
 
 // localStorage can throw (private mode, quota, disabled storage); the app must keep working without it.

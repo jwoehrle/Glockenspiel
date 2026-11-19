@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { LANGS, barName, detectLang, getLang, isLang, setLang, t } from "../../src/i18n";
+import { DEFAULT_LANG, LANGS, barName, getLang, isLang, setLang, t } from "../../src/i18n";
 import { ORDER } from "../../src/notes";
 
-describe("detectLang", () => {
-  it("picks the first supported browser language", () => {
-    expect(detectLang(["de-DE", "en-US"])).toBe("de");
-    expect(detectLang(["fr-FR", "en-GB"])).toBe("en");
-    expect(detectLang(["fr-FR", "de"])).toBe("de");
-  });
-  it("falls back to English", () => {
-    expect(detectLang([])).toBe("en");
-    expect(detectLang(["fr", "es-ES"])).toBe("en");
+describe("DEFAULT_LANG", () => {
+  it("is German", () => {
+    expect(DEFAULT_LANG).toBe("de");
+    expect(getLang()).toBe("de");
   });
 });
 
