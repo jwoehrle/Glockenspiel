@@ -1,430 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mein Glockenspiel</title>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#FBF6EE">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Glockenspiel">
-<style>
-  :root{--bg:#FBF6EE;--ink:#2B2522;--muted:#8A7F78;--card:#fff;}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-       min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 12px 32px}
-  h1{font-size:20px;margin:4px 0 12px;letter-spacing:.2px}
-  body.home .stage, body.home .track, body.home .controls, body.home .meter{display:none!important}
-  body.play .songs{display:none}
-  body.home h1{font-size:28px;margin:28px 0 18px}
-  .songs{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;max-width:640px}
-  .songs button{border:3px solid #E3D9CC;background:var(--card);border-radius:24px;padding:14px 10px;width:140px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.08)}
-  .songs button:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.08)}
-  .songs .ic{font-size:64px;line-height:1.1}
-  .songs .tt{font-size:14px;line-height:1.2}
-  .gear{position:fixed;top:6px;right:6px;width:36px;height:36px;border:none;border-radius:50%;background:transparent;font-size:18px;opacity:.3;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .8s,opacity .8s}
-  .gear.hold{transform:rotate(180deg) scale(1.3);opacity:.9}
-  .stage{position:relative;width:min(92vw,420px);display:flex;flex-direction:column;align-items:center}
-  .big{width:min(60vw,240px);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;
-       font-size:min(22vw,92px);font-weight:800;color:#fff;cursor:pointer;user-select:none;
-       box-shadow:0 10px 0 rgba(0,0,0,.12), inset 0 -10px 0 rgba(0,0,0,.08);transition:transform .12s, background .2s;position:relative}
-  .big:active{transform:translateY(4px)}
-  .big .star{position:absolute;top:6%;right:10%;font-size:.45em;color:#F2B63C;text-shadow:0 1px 2px rgba(0,0,0,.3)}
-  .big.hit{animation:pop .35s}
-  .big.miss{animation:shake .4s}
-  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
-  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
-  @keyframes fly{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.2);opacity:0}}
-  @keyframes pulse{50%{box-shadow:0 0 0 10px rgba(180,80,75,.25)}}
-  .sparks{position:absolute;left:50%;top:min(30vw,120px);width:0;height:0;pointer-events:none;z-index:5}
-  .sparks span{position:absolute;margin:-13px 0 0 -13px;font-size:26px;animation:fly .85s ease-out forwards}
-  .next{display:flex;align-items:center;gap:8px;min-height:44px;margin-top:6px;font-size:13px;color:var(--muted)}
-  .next .nd{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;opacity:.55}
-  .calcancel{display:none;margin-top:8px;border:none;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;background:#F2B63C;color:var(--ink);cursor:pointer}
-  .colname{margin-top:18px;font-size:22px;font-weight:700}
-  .syl{font-size:28px;font-weight:800;margin-top:4px;min-height:36px}
-  .hint{font-size:14px;color:var(--muted);min-height:20px;margin-top:4px;text-align:center}
-  .track{display:flex;gap:6px;overflow-x:auto;width:min(96vw,760px);padding:18px 8px 8px;scroll-behavior:smooth;margin-top:6px}
-  .dot{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.45}
-  .dot .c{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
-  .dot .t{font-size:11px;color:var(--muted);height:14px;white-space:nowrap}
-  .dot.done{opacity:.25}
-  .dot.cur{opacity:1}
-  .dot.cur .c{outline:3px solid var(--ink);outline-offset:3px}
-  .controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:16px}
-  .controls button{border:none;border-radius:22px;width:76px;height:76px;padding:0;font-size:36px;cursor:pointer;background:#EDE4D8;color:var(--ink);box-shadow:0 5px 0 rgba(0,0,0,.1)}
-  .controls button:active{transform:translateY(3px)}
-  .controls button.restart{width:auto;min-width:150px;padding:0 22px;font-size:22px;font-weight:800;background:#F2B63C;box-shadow:0 5px 0 rgba(0,0,0,.15)}
-  .controls button.primary{background:#2B9BD9;color:#fff}
-  .controls button.listening{background:#B4504B;color:#fff;animation:pulse 1.4s infinite}
-  .controls button.calon{background:#F2B63C;color:#2B2522}
-  .meter{width:min(70vw,260px);height:8px;background:#EDE4D8;border-radius:4px;margin-top:12px;overflow:hidden;display:none}
-  .meter i{display:block;height:100%;width:0;background:#3F6B47;transition:width .05s}
-  .done-box{display:none;flex-direction:column;align-items:center;margin-top:10px}
-  .done-box .yay{font-size:56px}
-  .done-box .again{border:none;border-radius:20px;background:#F2B63C;color:var(--ink);font-size:26px;font-weight:800;padding:18px 32px;margin-top:10px;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.15)}
-  .done-box p{font-size:22px;font-weight:800;margin:6px 0}
-  .sens{display:none;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:8px}
-  dialog{border:none;border-radius:18px;padding:20px;max-width:min(92vw,360px);background:var(--card);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.3)}
-  dialog::backdrop{background:rgba(0,0,0,.4)}
-  dialog h2{margin:0 0 8px;font-size:18px}
-  dialog button{display:block;width:100%;margin-top:8px;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;background:#EDE4D8;color:var(--ink)}
-  dialog button.primary{background:#2B9BD9;color:#fff;margin-top:14px}
-  dialog button:disabled{opacity:.4;cursor:default}
-  dialog .opt{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:15px}
-  dialog .opt input[type=checkbox]{width:20px;height:20px}
-  dialog .opt input[type=range]{flex:1}
-  dialog .st{font-size:13px;color:var(--muted);margin:4px 0;min-height:18px}
-  footer{display:none;margin-top:22px;font-size:12px;color:var(--muted);text-align:center;max-width:420px;line-height:1.4}
-</style>
-</head>
-<body>
-<button class="gear" id="settingsBtn" title="Eltern-Bereich (gedrückt halten)" aria-label="Eltern-Bereich">⚙️</button>
-<h1 id="title">🎵 Mein Glockenspiel</h1>
-<div class="songs" id="songs"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mein Glockenspiel</title>
+    <meta name="description" content="Glockenspiel-Lieder lernen mit Farben und Mikrofon" />
+    <meta name="theme-color" content="#FBF6EE" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Glockenspiel" />
+  </head>
+  <body class="home">
+    <button
+      class="gear"
+      id="settingsBtn"
+      title="Eltern-Bereich (gedrückt halten)"
+      aria-label="Eltern-Bereich"
+    >
+      ⚙️
+    </button>
+    <h1 id="title">🎵 Mein Glockenspiel</h1>
+    <div class="songs" id="songs"></div>
 
-<div class="stage">
-  <div class="big" id="big" title="Antippen = weiter"></div>
-  <div class="colname" id="colname"></div>
-  <div class="syl" id="syl"></div>
-  <div class="next" id="next"></div>
-  <div class="hint" id="hint"></div>
-  <button class="calcancel" id="calcancel">✖ Kalibrierung abbrechen</button>
-  <div class="sparks" id="sparks"></div>
-  <div class="done-box" id="done"><div class="yay">🎉⭐🎉</div><p>Super gemacht!</p><button id="again" class="again">🔁 Nochmal!</button></div>
-</div>
+    <div class="stage">
+      <div class="big" id="big" title="Antippen = weiter"></div>
+      <div class="colname" id="colname"></div>
+      <div class="syl" id="syl"></div>
+      <!-- Whole glockenspiel with the bar to strike popping out (tablet portrait: below the circle; landscape: beside it; see style.css) -->
+      <div class="instrument" id="instrument" role="group" aria-label="Glockenspiel"></div>
+      <div class="next" id="next"></div>
+      <div class="hint" id="hint"></div>
+      <button class="calcancel" id="calcancel">✖ Kalibrierung abbrechen</button>
+      <div class="sparks" id="sparks"></div>
+      <div class="done-box" id="done">
+        <div class="yay">🎉⭐🎉</div>
+        <p>Super gemacht!</p>
+        <button id="again" class="again">🔁 Nochmal!</button>
+      </div>
+    </div>
 
-<div class="track" id="track"></div>
+    <div class="track" id="track"></div>
 
-<div class="controls">
-  <button id="home" title="Lieder" aria-label="Lieder">🏠</button>
-  <button id="mic" class="primary" title="Zuhören" aria-label="Zuhören">🎤</button>
-  <button id="play" title="Vorspielen" aria-label="Vorspielen">🔊</button>
-  <button id="restart" class="restart">🔁 Von vorn</button>
-</div>
-<div class="meter" id="meter"><i id="lvl"></i></div>
+    <div class="controls">
+      <button id="home" title="Lieder" aria-label="Lieder">🏠</button>
+      <button id="mic" class="primary" title="Zuhören" aria-label="Zuhören">🎤</button>
+      <button id="play" title="Vorspielen" aria-label="Vorspielen">🔊</button>
+      <button id="playsong" title="Ganzes Lied vorspielen" aria-label="Ganzes Lied vorspielen">▶</button>
+      <button id="restart" class="restart">🔁 Von vorn</button>
+    </div>
+    <div class="meter" id="meter"><i id="lvl"></i></div>
 
-<dialog id="settings">
-  <h2>⚙️ Eltern-Bereich</h2>
-  <label class="opt"><input type="checkbox" id="optAuto"> Ton automatisch vorspielen</label>
-  <label class="opt"><input type="checkbox" id="optSpeak"> Farbe vorlesen</label>
-  <label class="opt">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6"></label>
-  <button id="back">⬅️ Einen Ton zurück</button>
-  <button id="cal">🎯 Kalibrieren</button>
-  <p class="st" id="calState"></p>
-  <button id="calreset">🗑 Kalibrierung löschen</button>
-  <button id="clearall">🧹 Alle gespeicherten Daten löschen</button>
-  <p class="st" id="setMsg"></p>
-  <button id="setClose" class="primary">Schließen</button>
-</dialog>
+    <dialog id="settings">
+      <h2>⚙️ Eltern-Bereich</h2>
+      <label class="opt"><input type="checkbox" id="optAuto" /> Ton automatisch vorspielen</label>
+      <label class="opt"><input type="checkbox" id="optSpeak" /> Farbe vorlesen</label>
+      <label class="opt">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6" /></label>
+      <button id="back">⬅️ Einen Ton zurück</button>
+      <button id="cal">🎯 Kalibrieren</button>
+      <p class="st" id="calState"></p>
+      <button id="calreset">🗑 Kalibrierung löschen</button>
+      <button id="clearall">🧹 Alle gespeicherten Daten löschen</button>
+      <p class="st" id="setMsg"></p>
+      <button id="setClose" class="primary">Schließen</button>
+    </dialog>
 
-<footer id="foot"></footer>
+    <footer id="foot"></footer>
+    <div class="preview" id="preview" hidden></div>
 
-<script>
-const COL = {
-  C:{hex:"#3F6B47",name:"Grün",pc:0}, D:{hex:"#5B4239",name:"Braun",pc:2}, E:{hex:"#B4504B",name:"Rot",pc:4},
-  F:{hex:"#F2B63C",name:"Gelb",pc:5}, G:{hex:"#9AA6B2",name:"Grau",pc:7}, A:{hex:"#2B9BD9",name:"Blau",pc:9},
-  H:{hex:"#8E5E9E",name:"Lila",pc:11}, c:{hex:"#3F6B47",name:"Grün rechts",pc:0}
-};
-const FREQ = {C:1046.5,D:1174.7,E:1318.5,F:1396.9,G:1568.0,A:1760.0,H:1975.5,c:2093.0};
-
-// syllable + notes (2 letters = two notes on one syllable)
-function build(lines){
-  const out=[];
-  lines.forEach((line,li)=>{
-    line.trim().split(/\s+/).forEach(tok=>{
-      const [s,n]=tok.split("|");
-      [...n].forEach((ch,i)=>out.push({s: i===0 ? s.replace(/_/g," ") : "～", n: ch, line: li}));
-    });
-  });
-  return out;
-}
-const SONGS = {
-  froh: {icon:"🥜",title:"Lasst uns froh und munter sein", notes: build([
-    "Lasst|G uns|G froh|GA und|GF mun-|E ter|E sein,|E",
-    "und|F uns|F recht|FG von|FE Her-|D zen|D freun!|D",
-    "Lus-|C tig,|D lus-|E tig,|F tra-le-|GA ra-le-|GA ra,|G",
-    "bald|c ist|G Ni-|GA ko-|GF laus-|E a-bend|D da,|G",
-    "bald|c ist|G Ni-|GA ko-|GF laus-|E a-bend|D da!|C"])},
-  jingle: {icon:"❄️",title:"Jingle Bells", notes: build([
-    "Jin-|E gle|E bells,|E jin-|E gle|E bells,|E",
-    "jin-|E gle|G all|C the|D way!|E",
-    "Oh|F what|F fun|F it|F is|F to|E ride|E in|E a|E",
-    "one-|E horse|D o-|D pen|E sleigh,|D hey!|G",
-    "Jin-|E gle|E bells,|E jin-|E gle|E bells,|E",
-    "jin-|E gle|G all|C the|D way!|E",
-    "Oh|F what|F fun|F it|F is|F to|E ride|E in|E a|E",
-    "one-|G horse|G o-|F pen|D sleigh!|C"])},
-  weihnachtsmann: {icon:"🎅",title:"Morgen kommt der Weihnachtsmann", notes: build([
-    "Mor-|C gen|C kommt|G der|G Weih-|A nachts-|A mann,|G",
-    "kommt|F mit|F sei-|E nen|E Ga-|DD ben.|C",
-    "Trom-|G mel,|G Pfei-|F fe|F und|E Ge-|E wehr,|D",
-    "Fahn|G und|G Sä-|F bel|F und|E noch|E mehr,|D",
-    "ja|C ein|C gan-|G zes|G Krie-|A ges-|A heer,|G",
-    "möcht|F ich|F ger-|E ne|E ha-|DD ben.|C"])},
-  // Alle drei Lieder liegen komplett im Bereich C–c (Noten aus Notenblatt/MIDI in C-Dur übernommen).
-  jahre: {icon:"🎄",title:"Alle Jahre wieder", notes: build([
-    "Al-|G le|A Jah-|G re|F wie-|E der,|D kommt|C das|DE Chris-|F tus-|E kind|D",
-    "auf|E die|G Er-|A de|G nie-|c der,|HA wo|G wir|FE Men-|F schen|G sind.|E"])},
-  kinderlein: {icon:"👶",title:"Ihr Kinderlein, kommet", notes: build([
-    "Ihr|G Kin-|G der-|E lein,|G kom-|G met,|E o|G kom-|F met|D doch|F all!|E",
-    "Zur|G Krip-|G pe|E her|G kom-|G met|E in|G Beth-|F le-|D hems|F Stall.|E",
-    "Und|E seht,|D was|D in|D die-|F ser|F hoch-|F hei-|E li-|E gen|E Nacht|A",
-    "der|A Va-|G ter|G im|G Him-|c mel|G für|E Freu-|G de|E uns|D macht.|C"])},
-  // Hinweis: In der Strophe „Öffnet mir die Türen“ steht im Original ein Fis (nicht auf dem Glockenspiel) – hier als F gespielt.
-  kling: {icon:"🔔",title:"Kling, Glöckchen", notes: build([
-    "Kling,|G Glöck-|E chen,|F klin-|G ge-|A lin-|G ge-|A ling,|G kling,|F Glöck-|D chen,|G kling!|E",
-    "Lasst|D mich|D ein,|E ihr|C Kin-|E der,|D ist|F so|F kalt|G der|D Win-|F ter!|E",
-    "Öff-|D net|D mir|E die|F Tü-|G ren,|D lasst|E mich|A nicht|G er-|F frie-|A ren!|G",
-    "Kling,|G Glöck-|E chen,|F klin-|G ge-|A lin-|G ge-|A ling,|G kling,|F Glöck-|D chen,|G kling!|C"])}
-};
-
-const ORDER=["C","D","E","F","G","A","H","c"];
-let songKey="froh", idx=0, ctx=null, calIdx=-1, calTmp={}, cal=loadCal();
-function loadCal(){ try{ const o=JSON.parse(localStorage.getItem("glock-cal")||"null"); if(o && ORDER.every(n=>o[n]>400)) return o; }catch(e){} return null; }
-function saveCal(){ try{ if(cal) localStorage.setItem("glock-cal",JSON.stringify(cal)); else localStorage.removeItem("glock-cal"); }catch(e){} }
-const $=id=>document.getElementById(id);
-const OPT_DEF={auto:false,speak:false};
-function loadOpts(){ try{ return {...OPT_DEF,...JSON.parse(localStorage.getItem("glock-opts")||"{}")}; }catch(e){ return {...OPT_DEF}; } }
-function saveOpts(){ try{ localStorage.setItem("glock-opts",JSON.stringify(opts)); }catch(e){} }
-let opts=loadOpts(), mode="home", announceT=0, annId=0;
-function setMode(m){ mode=m; document.body.className=m; const s=SONGS[songKey]; $("title").textContent = m==="home" ? "🎵 Mein Glockenspiel" : s.icon+" "+s.title; }
-
-function renderSongs(){
-  $("songs").innerHTML="";
-  for(const k in SONGS){
-    const b=document.createElement("button");
-    b.innerHTML=`<span class="ic">${SONGS[k].icon}</span><span class="tt">${SONGS[k].title}</span>`; b.title=SONGS[k].title;
-    b.onclick=()=>{ songKey=k; idx=0; setMode("play"); renderTrack(); show();
-      if(canMic && !micFailed && !listening) startMic().then(()=>announce()); else announce(); };
-    $("songs").appendChild(b);
-  }
-}
-function renderTrack(){
-  const t=$("track"); t.innerHTML="";
-  SONGS[songKey].notes.forEach((x,i)=>{
-    const d=document.createElement("div"); d.className="dot";
-    if(i>0 && x.line!==SONGS[songKey].notes[i-1].line) d.style.marginLeft="14px";
-    d.innerHTML=`<div class="c" style="background:${COL[x.n].hex}">${x.n==="c"?"C*":x.n}</div><div class="t">${x.s}</div>`;
-    d.onclick=()=>{idx=i;show();announce();};
-    t.appendChild(d);
-  });
-}
-function show(){
-  if(calIdx>=0){
-    const n=ORDER[calIdx], c=COL[n];
-    $("done").style.display="none"; $("big").style.display="flex"; $("colname").style.display="block"; $("syl").style.display="block";
-    $("big").style.background=c.hex;
-    $("big").innerHTML=(n==="c"?"C":n)+(n==="c"?'<span class="star">★</span>':"");
-    $("colname").textContent=c.name;
-    $("syl").textContent="Kalibrieren "+(calIdx+1)+"/"+ORDER.length;
-    $("hint").textContent="Schlag diesen Stab einzeln an (Kreis antippen = überspringen)";
-    [...$("track").children].forEach(d=>d.className="dot done");
-    $("next").innerHTML="";
-    return;
-  }
-  const notes=SONGS[songKey].notes, done=idx>=notes.length;
-  $("done").style.display=done?"flex":"none";
-  $("big").style.display=done?"none":"flex";
-  $("colname").style.display=done?"none":"block";
-  $("syl").style.display=done?"none":"block";
-  [...$("track").children].forEach((d,i)=>d.className="dot"+(i<idx?" done":"")+(i===idx?" cur":""));
-  if(done){ $("hint").textContent=""; $("next").innerHTML=""; return; }
-  const x=notes[idx], c=COL[x.n];
-  $("big").style.background=c.hex;
-  $("big").innerHTML=(x.n==="c"?"C":x.n)+(x.n==="c"?'<span class="star">★</span>':"");
-  $("colname").textContent=c.name + (x.n==="C" && SONGS[songKey].notes.some(y=>y.n==="c") ? " links" : "");
-  $("syl").textContent=x.s;
-  const nx=notes[idx+1];
-  $("next").innerHTML = nx ? `<span>danach</span><span class="nd" style="background:${COL[nx.n].hex}">${nx.n==="c"?"C":nx.n}</span>` : "";
-  const cur=$("track").children[idx];
-  if(cur){ const t=$("track"); t.scrollLeft = cur.offsetLeft - t.clientWidth/2 + 17; }
-}
-function next(){ const b=$("big"); b.classList.remove("hit"); void b.offsetWidth; b.classList.add("hit"); sparkle(); idx++; show(); announce(); }
-// falscher Ton: nur ein sanftes Wackeln, kein Text, kein Ton
-function miss(n){ const b=$("big"); b.classList.remove("miss"); void b.offsetWidth; b.classList.add("miss"); }
-function sparkle(){
-  const box=$("sparks");
-  for(let i=0;i<8;i++){
-    const e=document.createElement("span"), a=(i/8)*2*Math.PI+Math.random()*.5, r=80+Math.random()*60;
-    e.textContent=["⭐","✨","🌟"][i%3];
-    e.style.setProperty("--dx",Math.cos(a)*r+"px"); e.style.setProperty("--dy",Math.sin(a)*r+"px");
-    box.appendChild(e); setTimeout(()=>e.remove(),900);
-  }
-}
-// Detektor kurz stummschalten, damit die App ihren eigenen Ton nicht "hört"
-function blockDetect(ms){ lastHit=performance.now()+ms; pending=0; }
-// neuen Ton ankündigen: optional Farbe vorlesen, optional Ton vorspielen
-function announce(){
-  const my=++annId; clearTimeout(announceT);
-  try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){}
-  if(mode!=="play" || calIdx>=0 || (!opts.auto && !opts.speak)) return;
-  const x=SONGS[songKey].notes[idx]; if(!x) return;
-  blockDetect(opts.speak?2500:1500);
-  const ring=()=>{ if(my===annId && opts.auto && mode==="play" && calIdx<0){ blockDetect(1500); bell(x.n); } };
-  if(opts.speak && "speechSynthesis" in window){
-    let fired=false; const go=()=>{ if(fired||my!==annId) return; fired=true; clearTimeout(announceT); ring(); };
-    const u=new SpeechSynthesisUtterance($("colname").textContent); u.lang="de-DE"; u.rate=.9; u.onend=go; u.onerror=go;
-    announceT=setTimeout(go,1800);
-    try{ speechSynthesis.speak(u); }catch(e){ go(); }
-  } else announceT=setTimeout(ring,300);
-}
-
-function audio(){ if(!ctx){ ctx=new (window.AudioContext||window.webkitAudioContext)(); } if(ctx.state==="suspended") ctx.resume(); return ctx; }
-function bell(n){
-  const a=audio(), t=a.currentTime, f=(cal?cal[n]:FREQ[n])/2;
-  [[1,0.5,1.6],[2.76,0.12,0.5],[5.4,0.05,0.25]].forEach(([m,g,d])=>{
-    const o=a.createOscillator(), v=a.createGain(); o.type="sine"; o.frequency.value=f*m;
-    v.gain.setValueAtTime(0,t); v.gain.linearRampToValueAtTime(g,t+0.005); v.gain.exponentialRampToValueAtTime(0.0001,t+d);
-    o.connect(v).connect(a.destination); o.start(t); o.stop(t+d+0.05);
-  });
-}
-
-$("big").onclick=()=>{ if(calIdx>=0) calAdvance(); else next(); };
-$("play").onclick=()=>{ const x=SONGS[songKey].notes[idx]; if(x){ blockDetect(1800); bell(x.n); } };
-$("back").onclick=()=>{ $("settings").close(); idx=Math.max(0,idx-1); show(); announce(); };
-$("restart").onclick=$("again").onclick=()=>{ idx=0; show(); announce(); };
-$("home").onclick=()=>{ ++annId; clearTimeout(announceT); try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} if(listening) stopMic(); setMode("home"); };
-
-// ---------- Mikrofon ----------
-let listening=false, stream=null, analyser=null, raf=null, micFailed=false;
-const canMic = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-if(!canMic){ $("mic").style.display="none"; }
-
-$("mic").onclick=()=>{ if(listening) stopMic(); else startMic(); };
-async function startMic(){
-  try{
-    const a=audio();
-    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-    const src=a.createMediaStreamSource(stream);
-    analyser=a.createAnalyser(); analyser.fftSize=4096; analyser.smoothingTimeConstant=0;
-    src.connect(analyser);
-    listening=true; $("mic").className="listening";
-    $("meter").style.display="block";
-    $("hint").textContent="Ich höre zu – spiel den Ton!";
-    loop();
-    return true;
-  }catch(e){
-    micFailed=true; $("mic").style.display="none"; $("foot").style.display="block";
-    $("foot").innerHTML="Das Mikrofon ist hier nicht erlaubt. Öffne die HTML-Datei im Browser (z.&nbsp;B. Chrome), dann hört die App zu. Bis dahin: großen Kreis antippen.";
-    return false;
-  }
-}
-function stopMic(){
-  if(calIdx>=0) endCal(false);
-  listening=false; cancelAnimationFrame(raf);
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  $("mic").className="primary";
-  $("meter").style.display="none"; $("hint").textContent="";
-}
-
-// Einsatz-Erkennung: kurzes Fenster (letzte 512 Samples ≈ 10 ms) und Anstieg gegenüber dem
-// vorigen Frame. Nachklingende Töne werden nur leiser, ein neuer Anschlag ist immer ein Sprung nach oben.
-let lastHit=0, pending=0, prevRms=0, tdBuf=null;
-function loop(){
-  raf=requestAnimationFrame(loop);
-  if(!tdBuf || tdBuf.length!==analyser.fftSize) tdBuf=new Float32Array(analyser.fftSize);
-  analyser.getFloatTimeDomainData(tdBuf);
-  const n=tdBuf.length, W=512; let s=0; for(let i=n-W;i<n;i++) s+=tdBuf[i]*tdBuf[i]; const rms=Math.sqrt(s/W);
-  $("lvl").style.width=Math.min(100,rms*600)+"%";
-  const now=performance.now(), sens=+$("sens").value;
-  const minRms = 0.004 + (10-sens)*0.006;
-  if(!pending && now-lastHit>150 && rms>minRms && rms>prevRms*1.5){ pending=now; }
-  prevRms=rms;
-  if(pending && now-pending>55){ pending=0; lastHit=now; detect(); }
-}
-function peakFreqs(){
-  const a=audio(), sr=a.sampleRate, N=analyser.frequencyBinCount;
-  const sp=new Float32Array(N); analyser.getFloatFrequencyData(sp);
-  const binHz=sr/analyser.fftSize, lo=Math.floor(450/binHz), hi=Math.ceil(5000/binHz);
-  const peaks=[];
-  for(let i=lo+1;i<hi;i++){ if(sp[i]>sp[i-1] && sp[i]>=sp[i+1]) peaks.push(i); }
-  peaks.sort((x,y)=>sp[y]-sp[x]);
-  if(!peaks.length) return [];
-  const top=sp[peaks[0]], out=[];
-  for(const i of peaks.slice(0,4)){
-    if(sp[i]<top-12) break;
-    const p=0.5*(sp[i-1]-sp[i+1])/(sp[i-1]-2*sp[i]+sp[i+1]||1);
-    out.push((i+p)*binHz);
-  }
-  return out; // stärkste zuerst
-}
-const cents=(f,ref)=>1200*Math.log2(f/ref);
-function detect(){
-  const fs=peakFreqs(); if(!fs.length) return;
-  if(calIdx>=0){ calHit(fs); return; }
-  const x=SONGS[songKey].notes[idx]; if(!x) return;
-  if(cal){
-    // gegen die kalibrierten Frequenzen prüfen (±50 Cent)
-    if(fs.some(f=>Math.abs(cents(f,cal[x.n]))<50)) { next(); return; }
-    for(const f of fs){ const k=ORDER.find(k=>k!=="c" && Math.abs(cents(f,cal[k]))<50); if(k){ miss(k); return; } }
-    return;
-  }
-  const cands=[];
-  for(const f of fs){ const midi=69+12*Math.log2(f/440), r=Math.round(midi); if(Math.abs(midi-r)<0.4) cands.push(((r%12)+12)%12); }
-  if(!cands.length) return;
-  if(cands.includes(COL[x.n].pc)) next();
-  else { const k=Object.keys(COL).find(k=>k!=="c" && COL[k].pc===cands[0]); if(k) miss(k); }
-}
-
-// ---------- Kalibrierung ----------
-function updateCalUI(){
-  $("cal").textContent = calIdx>=0 ? "✖ Kalibrierung abbrechen" : (cal ? "🎯 Neu kalibrieren" : "🎯 Kalibrieren");
-  $("cal").className = calIdx>=0 ? "calon" : "";
-  $("calreset").disabled = !cal;
-  $("calcancel").style.display = calIdx>=0 ? "block" : "none";
-  $("calState").textContent = cal ? "Kalibrierung gespeichert." : "Keine Kalibrierung gespeichert.";
-}
-function calHit(fs){
-  const n=ORDER[calIdx], nominal=FREQ[n];
-  const f=fs.find(f=>Math.abs(cents(f,nominal))<120);  // stärkster Peak nahe dem erwarteten Ton
-  if(!f){ $("hint").textContent="Nicht erkannt – nochmal anschlagen"; return; }
-  calTmp[n]=f; $("hint").textContent=Math.round(f)+" Hz ✓";
-  setTimeout(calAdvance,350);
-}
-function calAdvance(){
-  if(calIdx<0) return;
-  calIdx++;
-  if(calIdx>=ORDER.length) endCal(true); else show();
-}
-function endCal(ok){
-  calIdx=-1;
-  if(ok){
-    // übersprungene Töne: bisherige Werte bzw. Nominalwert behalten
-    const base=cal||FREQ; cal={}; ORDER.forEach(n=>cal[n]=calTmp[n]||base[n]); saveCal();
-  }
-  updateCalUI(); show();
-  $("hint").textContent = ok ? "Kalibriert ✓ – die App erkennt jetzt dein Glockenspiel." : "";
-}
-$("cal").onclick=async()=>{
-  $("settings").close();
-  if(calIdx>=0){ endCal(false); return; }
-  if(mode!=="play"){ setMode("play"); renderTrack(); }
-  if(!listening && !(await startMic())) return;
-  calIdx=0; calTmp={}; updateCalUI(); show();
-};
-$("calcancel").onclick=()=>endCal(false);
-function openSettings(){ $("setMsg").textContent=""; $("optAuto").checked=opts.auto; $("optSpeak").checked=opts.speak; updateCalUI(); $("settings").showModal(); }
-// Eltern-Bereich: Zahnrad ~1 Sekunde gedrückt halten (Tastatur: Enter)
-const gear=$("settingsBtn"); let gearT=0;
-gear.addEventListener("pointerdown",()=>{ gear.classList.add("hold"); clearTimeout(gearT); gearT=setTimeout(()=>{ gear.classList.remove("hold"); openSettings(); },800); });
-["pointerup","pointerleave","pointercancel"].forEach(ev=>gear.addEventListener(ev,()=>{ clearTimeout(gearT); gear.classList.remove("hold"); }));
-gear.addEventListener("click",e=>{ if(e.detail===0) openSettings(); });
-gear.addEventListener("contextmenu",e=>e.preventDefault());
-$("setClose").onclick=()=>$("settings").close();
-$("settings").addEventListener("click",e=>{ if(e.target===$("settings")) $("settings").close(); });
-$("optAuto").onchange=()=>{ opts.auto=$("optAuto").checked; saveOpts(); };
-$("optSpeak").onchange=()=>{ opts.speak=$("optSpeak").checked; saveOpts(); };
-$("calreset").onclick=()=>{ cal=null; saveCal(); updateCalUI(); $("setMsg").textContent="Kalibrierung gelöscht."; };
-$("clearall").onclick=()=>{ try{ localStorage.clear(); }catch(e){} cal=null; opts={...OPT_DEF}; $("optAuto").checked=opts.auto; $("optSpeak").checked=opts.speak; updateCalUI(); $("setMsg").textContent="Alle gespeicherten Daten gelöscht."; };
-if(!canMic){ $("cal").style.display="none"; }
-updateCalUI();
-
-setMode("home"); renderSongs(); renderTrack(); show();
-if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
-</script>
-</body>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

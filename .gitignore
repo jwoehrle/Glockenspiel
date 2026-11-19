@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dev-dist/
+test-results/
+playwright-report/
+tests/e2e/.fixtures/
+*.log
+.DS_Store
+.site/
+playwright-report-preview/
