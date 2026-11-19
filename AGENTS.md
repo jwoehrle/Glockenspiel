@@ -72,7 +72,7 @@ Stop dev/preview servers when done.
   `playSong()`/`stopSong()` in `app.ts`: ▶ plays the whole song from the start; circle, track and glockenspiel
   follow every note; the microphone is muted; any other interaction (circle, bar, track, 🔊, 🔁, 🏠, calibration)
   stops it. Afterwards the song is back at the first note.
-- `src/audio/speed.ts` (pure): `SPEEDS` ½× ¾× 1× 1¼× 1½×, `slower`/`faster` (stop at the ends), `speedLabel`. Saved in the
+- `src/audio/speed.ts` (pure): `SPEEDS` ½× ¾× 1× 1¼× 1½×, `slower`/`faster` (stop at the ends). Saved in the
   options as `speed`. ▶ plays at `bpm × speed`. Changing the speed during playback does **not** stop it (the one
   exception to "any interaction stops it"): the song goes on at the new tempo with the next note (`scheduleFrom`).
 - `src/storage.ts`: `localStorage` keys `glock-cal` (calibration) and `glock-opts` (options); never throws.
@@ -136,7 +136,7 @@ Stop dev/preview servers when done.
 ## UI decisions to preserve
 
 - Large, icon-based, minimal start screen (song tiles only). Tapping a tile starts the song and turns the mic on.
-- Controls are icon-only (🏠 🎤 🔊 ▶/⏹, and the speed of ▶: 🐌 slower, a button showing the speed that resets to 1×, 🏎 faster) plus a big yellow "🔁 Von vorn". ▶ plays the whole song in rhythm. The finish screen has a big "🔁 Nochmal!".
+- Controls are icon-only (🏠 🎤 🔊 ▶/⏹, and the speed of ▶: 🐌 slower, **1×**, which always reads 1× and resets the speed (highlighted while it is not 1×), 🏎 faster) plus a big yellow "🔁 Von vorn". ▶ plays the whole song in rhythm. The finish screen has a big "🔁 Nochmal!".
 - **Every song tile needs a unique icon that is not used elsewhere in the UI** (enforced by a unit test). Current:
   🥜 Lasst uns froh und munter sein, ❄ Jingle Bells, 🎅 Morgen kommt der Weihnachtsmann, 🎄 Alle Jahre wieder,
   👶 Ihr Kinderlein, 🔔 Kling, Glöckchen, 😴 Bruder Jakob, 🎆 Freude, schöner Götterfunken. Avoid 🔊 🎤 🏠 🔁 ⚙ 🎵 ▶ ⏹

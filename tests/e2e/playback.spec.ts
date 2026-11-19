@@ -126,7 +126,9 @@ async function expectOnsets(
   return now;
 }
 
-test("🐌 plays slower, 🏎 faster, 1× goes back to the song's tempo; the choice is saved", async ({ page }) => {
+test("🐌 plays slower, 🏎 faster, 1× (always labelled 1×) goes back to the song's tempo; the choice is saved", async ({
+  page,
+}) => {
   await page.goto("./");
   await openSong(page, "Freude, schöner Götterfunken");
   const notes = SONGS.freude.notes;
@@ -135,7 +137,7 @@ test("🐌 plays slower, 🏎 faster, 1× goes back to the song's tempo; the cho
   await expect(normalBtn(page)).not.toHaveClass(/changed/);
 
   await slowerBtn(page).click();
-  await expect(normalBtn(page)).toHaveText("¾×");
+  await expect(normalBtn(page)).toHaveText("1×");
   await expect(normalBtn(page)).toHaveClass(/changed/);
   await startPlayback(page);
   await expectOnsets(page, schedule(notes, bpm * 0.75).onsets.slice(0, 6), 0, 0);
@@ -143,21 +145,26 @@ test("🐌 plays slower, 🏎 faster, 1× goes back to the song's tempo; the cho
 
   await fasterBtn(page).click();
   await fasterBtn(page).click();
-  await expect(normalBtn(page)).toHaveText("1¼×");
+  await expect(normalBtn(page)).toHaveText("1×");
   await startPlayback(page);
   await expectOnsets(page, schedule(notes, bpm * 1.25).onsets.slice(0, 6), 0, 0);
   await playButton(page).click();
 
   await page.reload();
   await openSong(page, "Freude, schöner Götterfunken");
-  await expect(normalBtn(page)).toHaveText("1¼×"); // saved
+  // saved: still 1¼× after a reload (the button still reads 1×, but is highlighted)
+  await expect(normalBtn(page)).toHaveText("1×");
+  await expect(normalBtn(page)).toHaveClass(/changed/);
+  await startPlayback(page);
+  await expectOnsets(page, schedule(notes, bpm * 1.25).onsets.slice(0, 4), 0, 0);
+  await playButton(page).click();
 
   // Limits: the buttons switch off at ½× and 1½×.
   await fasterBtn(page).click();
-  await expect(normalBtn(page)).toHaveText("1½×");
+  await expect(normalBtn(page)).toHaveText("1×");
   await expect(fasterBtn(page)).toBeDisabled();
   for (let i = 0; i < 4; i++) await slowerBtn(page).click();
-  await expect(normalBtn(page)).toHaveText("½×");
+  await expect(normalBtn(page)).toHaveText("1×");
   await expect(slowerBtn(page)).toBeDisabled();
   await expect(fasterBtn(page)).toBeEnabled();
 

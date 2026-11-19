@@ -1,20 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { scheduleFrom, schedule } from "../../src/audio/player";
-import {
-  DEFAULT_SPEED,
-  SPEEDS,
-  faster,
-  isFastest,
-  isSlowest,
-  isSpeed,
-  slower,
-  speedLabel,
-} from "../../src/audio/speed";
+import { DEFAULT_SPEED, SPEEDS, faster, isFastest, isSlowest, isSpeed, slower } from "../../src/audio/speed";
 import { SONGS } from "../../src/songs";
 
 describe("playback speed", () => {
   it("steps through ½× ¾× 1× 1¼× 1½× and stops at both ends", () => {
-    expect(SPEEDS.map(speedLabel)).toEqual(["½×", "¾×", "1×", "1¼×", "1½×"]);
+    expect(SPEEDS).toEqual([0.5, 0.75, 1, 1.25, 1.5]);
     expect(DEFAULT_SPEED).toBe(1);
     expect(slower(1)).toBe(0.75);
     expect(slower(0.75)).toBe(0.5);

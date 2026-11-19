@@ -70,7 +70,7 @@ tests/e2e/            Playwright
 ## Usage
 
 - **Tap a song tile:** starts the song and turns the microphone on.
-- **🎤** microphone on/off · **🔊** play the current note · **▶** play the whole song (⏹ stops) · **🐌 / 🏎** play it slower or faster (the button between them shows the speed and resets it to 1×) · **🔁 Von vorn**
+- **🎤** microphone on/off · **🔊** play the current note · **▶** play the whole song (⏹ stops) · **🐌 / 🏎** play it slower or faster (**1×** between them goes back to the normal speed) · **🔁 Von vorn**
   restart the song · **🏠** back to the song list. While the song plays, the circle and the glockenspiel show each note.
 - **Without a glockenspiel:** tap the big circle to play the current note and move on.
 - **On a tablet or laptop**, the whole glockenspiel is shown below the circle (portrait) or beside it (landscape), and

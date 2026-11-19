@@ -1,6 +1,6 @@
 import { bell } from "./audio/bell";
 import { SongPlayer } from "./audio/player";
-import { DEFAULT_SPEED, faster, isFastest, isSlowest, slower, speedLabel, type Speed } from "./audio/speed";
+import { DEFAULT_SPEED, faster, isFastest, isSlowest, slower, type Speed } from "./audio/speed";
 import { calibrationPeak, judge, type Calibration } from "./mic/detect";
 import { Mic, canMic } from "./mic/mic";
 import { COL, FREQ, ORDER, highTwin, isHigh, label, type NoteName } from "./notes";
@@ -89,9 +89,8 @@ function playSong(from = 0, lead = 0): void {
 }
 
 function updateSpeedUI(): void {
-  const s = button("speed");
-  s.textContent = speedLabel(opts.speed);
-  s.classList.toggle("changed", opts.speed !== DEFAULT_SPEED);
+  // "1×" always reads 1× (it resets the speed); it is only highlighted while the speed is not 1×.
+  button("speed").classList.toggle("changed", opts.speed !== DEFAULT_SPEED);
   button("slower").disabled = isSlowest(opts.speed);
   button("faster").disabled = isFastest(opts.speed);
 }
