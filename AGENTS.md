@@ -80,7 +80,8 @@ Stop dev/preview servers when done.
   `strikeBar`); the bar to strike pops out, and the bars are buttons (`tapBar` in `app.ts`). Two layouts in
   `style.css`: tablet portrait (portrait, ≥ 700 × 800 px) shows it below the circle; landscape ≥ 900 × 600 px
   (laptops, tablet landscape) uses a grid with the circle column left and the glockenspiel right, track and controls
-  below, without scrolling at 1280 × 640. Hidden on phones (portrait and landscape) and on the finish screen.
+  below, without scrolling at 1280 × 640. Below the track: `.dock` with the playback rows (`.playback`: ▶ alone, then
+  🐌 1× 🏎) and the other `.controls`; stacked in portrait, side by side in landscape (smaller ▶ and speed buttons). Hidden on phones (portrait and landscape) and on the finish screen.
 - `src/ui/staff.ts`: staff notation (treble clef, C major, no accidentals). `staffStep` (C = c'' = step 7 ... f = f''' = step 17,
   written an octave below the sounding pitch like children's glockenspiel books), `ledgerSteps`, `renderStaff` (current note in
   the bar's color plus the next one faded). Clef is a hand-drawn SVG path (music fonts are not reliably installed). Parent option

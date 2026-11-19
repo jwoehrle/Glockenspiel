@@ -57,7 +57,7 @@ for (const [name, viewport] of [
       if (!s || !big || !ins) throw new Error("not laid out");
       expect(s.x + s.width).toBeLessThanOrEqual(big.x); // left of the circle
       expect(ins.x).toBeGreaterThanOrEqual(big.x + big.width); // glockenspiel stays on the right
-      for (const id of ["#track", ".controls"]) {
+      for (const id of ["#track", ".playback", ".controls"]) {
         const b = await page.locator(id).boundingBox();
         expect(b && b.y + b.height, `${id} visible without scrolling`).toBeLessThanOrEqual(viewport.height);
       }

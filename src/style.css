@@ -31,6 +31,7 @@ h1 {
 body.home .stage,
 body.home .track,
 body.home .controls,
+body.home .dock,
 body.home .meter {
   display: none !important;
 }
@@ -310,6 +311,19 @@ body.home h1 {
   outline: 3px solid var(--ink);
   outline-offset: 3px;
 }
+/* Below the track: the playback rows (▶, then 🐌 1× 🏎), then the other controls. */
+.dock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.playback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
 .controls {
   display: flex;
   gap: 10px;
@@ -318,7 +332,8 @@ body.home h1 {
   align-items: center;
   margin-top: 16px;
 }
-.controls button {
+.controls button,
+.playback button {
   border: none;
   border-radius: 22px;
   width: 76px;
@@ -330,7 +345,8 @@ body.home h1 {
   color: var(--ink);
   box-shadow: 0 5px 0 rgba(0, 0, 0, 0.1);
 }
-.controls button:active {
+.controls button:active,
+.playback button:active {
   transform: translateY(3px);
 }
 .controls button.restart {
@@ -593,8 +609,19 @@ footer {
   body.play .instrument:not(.idle) {
     display: flex;
     width: min(92vw, 640px);
-    height: 210px;
-    margin-top: 22px;
+    height: 170px;
+    margin-top: 14px;
+  }
+  /* room for the playback rows below the track without scrolling */
+  body.play .stage > .big {
+    width: min(60vw, 220px);
+  }
+  body.play .playback {
+    gap: 6px;
+    margin-top: 8px;
+  }
+  body.play .controls {
+    margin-top: 10px;
   }
 }
 
@@ -650,8 +677,33 @@ footer {
   body.play {
     padding-bottom: 8px;
   }
+  /* Playback rows and the other controls side by side, so everything fits without scrolling. */
+  body.play .dock {
+    flex-direction: row;
+    align-items: center;
+    gap: 40px;
+    margin-top: 6px;
+  }
+  body.play .playback {
+    gap: 6px;
+    margin-top: 0;
+  }
+  body.play .playback .playrow button {
+    width: 64px;
+    height: 64px;
+    font-size: 30px;
+  }
+  body.play .playback .speed button {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+  body.play .playback .speed button#speed {
+    min-width: 48px;
+    font-size: 16px;
+  }
   body.play .controls {
-    margin-top: 10px;
+    margin-top: 0;
   }
   /* Staff notation on: a third column on the left, everything else moves one column to the right. */
   body.play.notation .stage {
@@ -690,6 +742,13 @@ footer {
     max-width: 260px;
   }
 }
+/* Short landscape screens (small laptops): a smaller circle leaves room for the playback rows below the track. */
+@media (orientation: landscape) and (min-width: 900px) and (min-height: 600px) and (max-height: 720px) {
+  body.play .stage > .big {
+    width: min(26vh, 240px);
+    font-size: min(11vh, 92px);
+  }
+}
 @keyframes barstrike {
   0% {
     filter: brightness(1.35);
@@ -720,36 +779,36 @@ footer {
 }
 
 /* speed of "play the whole song": 🐌 slower, normal speed (shows the current speed), 🏎 faster */
-.controls .speed {
+.playback .speed {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
 }
-.controls .speed button {
+.playback .speed button {
   width: 56px;
   height: 56px;
   border-radius: 18px;
   font-size: 28px;
 }
-.controls .speed button#speed {
+.playback .speed button#speed {
   width: auto;
   min-width: 56px;
   padding: 0 8px;
   font-size: 18px;
   font-weight: 800;
 }
-.controls .speed button#speed.changed {
+.playback .speed button#speed.changed {
   background: #f2b63c;
 }
-.controls .speed button:disabled {
+.playback .speed button:disabled {
   opacity: 0.35;
   cursor: default;
 }
 /* "play the whole song" button */
-.controls button#playsong {
+.playback button#playsong {
   color: var(--ink);
 }
-.controls button#playsong.playing {
+.playback button#playsong.playing {
   background: #3f6b47;
   color: #fff;
 }

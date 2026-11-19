@@ -14,6 +14,7 @@ test("start screen shows only the song tiles", async ({ page }) => {
   for (const s of Object.values(SONGS)) await expect(page.locator("#songs")).toContainText(s.title);
   await expect(page.locator("#big")).toBeHidden();
   await expect(page.locator(".controls")).toBeHidden();
+  await expect(page.locator(".playback")).toBeHidden();
 });
 
 test("tapping a tile starts the song with the first note", async ({ page }) => {

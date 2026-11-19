@@ -200,21 +200,59 @@ test("changing the speed during playback goes on at the new tempo instead of sto
   await expect(playButton(page)).toHaveText("⏹");
 });
 
-for (const [name, viewport] of [
-  ["tablet portrait", { width: 768, height: 1024 }],
-  ["small laptop", { width: 1280, height: 640 }],
+const box = async (page: Page, sel: string) => {
+  const b = await page.locator(sel).boundingBox();
+  if (!b) throw new Error(`${sel} not laid out`);
+  return { ...b, bottom: b.y + b.height, right: b.x + b.width, cy: b.y + b.height / 2 };
+};
+
+for (const [name, viewport, beside] of [
+  ["phone", { width: 390, height: 844 }, false],
+  ["tablet portrait", { width: 768, height: 1024 }, false],
+  ["tablet portrait (iPad 10th gen)", { width: 820, height: 1180 }, false],
+  ["small laptop", { width: 1280, height: 640 }, true],
+  ["tablet landscape", { width: 1024, height: 768 }, true],
 ] as const) {
-  test(`${name}: 🐌 1× 🏎 fit into the one row of controls`, async ({ page }) => {
+  test(`${name}: ▶ in its own row below the track, 🐌 1× 🏎 in the row below`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto("./");
     await openSong(page, "Bruder Jakob");
-    const centers = await page.locator(".controls button").evaluateAll((bs: HTMLElement[]) =>
-      bs
-        .filter((b) => b.offsetParent)
-        .map((b) => b.getBoundingClientRect())
-        .map((r) => r.top + r.height / 2),
-    );
-    expect(centers.length).toBeGreaterThanOrEqual(7);
-    expect(Math.max(...centers) - Math.min(...centers)).toBeLessThan(4);
+    const track = await box(page, "#track");
+    const play = await box(page, "#playsong");
+    const slow = await box(page, "#slower");
+    const norm = await box(page, "#speed");
+    const fast = await box(page, "#faster");
+    const controls = await box(page, ".controls");
+
+    // ▶ directly below the track, alone in its row (nothing else at its height in the playback block)
+    expect(play.y).toBeGreaterThanOrEqual(track.bottom);
+    expect(play.y - track.bottom).toBeLessThan(40);
+    await expect(page.locator(".playrow button")).toHaveCount(1);
+    // 🐌 1× 🏎: one row, in this order, below ▶ and centered under it
+    expect(slow.y).toBeGreaterThanOrEqual(play.bottom);
+    for (const b of [norm, fast]) expect(Math.abs(b.cy - slow.cy)).toBeLessThan(2);
+    expect(slow.right).toBeLessThanOrEqual(norm.x);
+    expect(norm.right).toBeLessThanOrEqual(fast.x);
+    expect(Math.abs((slow.x + fast.right) / 2 - (play.x + play.width / 2))).toBeLessThan(2);
+
+    if (beside) {
+      // landscape: the other controls to the right of the playback rows
+      expect(controls.x).toBeGreaterThanOrEqual(fast.right);
+      expect(controls.y).toBeGreaterThanOrEqual(track.bottom);
+      expect(controls.bottom).toBeLessThanOrEqual(viewport.height);
+      expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(
+        viewport.height,
+      );
+    } else {
+      // portrait: the other controls below them
+      expect(controls.y).toBeGreaterThanOrEqual(Math.max(slow.bottom, norm.bottom, fast.bottom));
+      if (name.startsWith("tablet")) {
+        // tablets: still everything on one screen
+        expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(
+          viewport.height,
+        );
+      }
+    }
+    await page.screenshot({ path: `test-results/playback-rows-${name.replace(" ", "-")}.png` });
   });
 }
