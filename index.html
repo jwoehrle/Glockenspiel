@@ -26,6 +26,8 @@
 
     <div class="stage">
       <div class="big" id="big" title="Antippen = weiter"></div>
+      <!-- Staff notation (parent option; left of the circle on tablets and laptops, hidden on phones) -->
+      <div class="staff idle" id="staff" role="img"></div>
       <div class="colname" id="colname"></div>
       <div class="syl" id="syl"></div>
       <!-- Whole glockenspiel with the bar to strike popping out (tablet portrait: below the circle; landscape: beside it; see style.css) -->
@@ -56,6 +58,7 @@
       <h2>⚙️ Eltern-Bereich</h2>
       <label class="opt"><input type="checkbox" id="optAuto" /> Ton automatisch vorspielen</label>
       <label class="opt"><input type="checkbox" id="optSpeak" /> Farbe vorlesen</label>
+      <label class="opt"><input type="checkbox" id="optStaff" /> Noten anzeigen</label>
       <label class="opt">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6" /></label>
       <button id="back">⬅️ Einen Ton zurück</button>
       <button id="cal">🎯 Kalibrieren</button>

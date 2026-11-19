@@ -528,6 +528,50 @@ footer {
     barpulse 1.2s ease-in-out 0.3s infinite;
 }
 
+/* ---------- Staff notation ----------
+   Shown only where there is room (same layouts as the glockenspiel picture) and only if the parent turned it on. */
+.staff {
+  display: none;
+}
+.staff svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.staff .staff-lines line,
+.staff .ledger,
+.staff .stem {
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+.staff .clef {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.staff .head {
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+.staff .next-note {
+  opacity: 0.4;
+}
+
+/* Tablet portrait: in the free space left of the circle (may reach beyond the narrow stage). */
+@media (orientation: portrait) and (min-width: 700px) and (min-height: 800px) {
+  body.play.notation .staff:not(.idle) {
+    --sw: min(220px, calc(50vw - min(60vw, 240px) / 2 - 16px));
+    display: block;
+    position: absolute;
+    width: var(--sw);
+    /* right edge 10px left of the circle (the stage is centered on the circle), vertically centered on it */
+    right: calc(50% + min(60vw, 240px) / 2 + 10px);
+    top: calc(min(60vw, 240px) / 2 - var(--sw) * 0.48);
+  }
+}
+
 /* Tablet portrait: glockenspiel below the circle. */
 @media (orientation: portrait) and (min-width: 700px) and (min-height: 800px) {
   body.play .instrument:not(.idle) {
@@ -592,6 +636,42 @@ footer {
   }
   body.play .controls {
     margin-top: 10px;
+  }
+  /* Staff notation on: a third column on the left, everything else moves one column to the right. */
+  body.play.notation .stage {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 1.5fr);
+    column-gap: 24px;
+  }
+  body.play.notation .stage > .big,
+  body.play.notation .stage > .sparks {
+    grid-area: 1 / 2;
+  }
+  body.play.notation .stage > .colname {
+    grid-area: 2 / 2;
+  }
+  body.play.notation .stage > .syl {
+    grid-area: 3 / 2;
+  }
+  body.play.notation .stage > .next {
+    grid-area: 4 / 2;
+  }
+  body.play.notation .stage > .hint {
+    grid-area: 5 / 2;
+  }
+  body.play.notation .stage > .calcancel {
+    grid-area: 6 / 2;
+  }
+  body.play.notation .stage > .instrument:not(.idle) {
+    grid-area: 1 / 3 / 6 / 4;
+  }
+  body.play.notation .stage > .done-box {
+    grid-area: 1 / 1 / 7 / 4;
+  }
+  body.play.notation .stage > .staff:not(.idle) {
+    display: block;
+    grid-area: 1 / 1 / 6 / 2;
+    width: 100%;
+    max-width: 260px;
   }
 }
 @keyframes barstrike {

@@ -77,7 +77,8 @@ tests/e2e/            Playwright
   the bar to strike pops out.
   Tap the bars to play the song on the screen: the right bar moves on, a wrong one only wobbles.
 - **Parent area:** press and hold the ⚙ in the top-right corner for about 1 second. It contains: autoplay, read the
-  color aloud, microphone sensitivity, one note back, calibration, and clearing saved data.
+  color aloud, staff notation (_Noten anzeigen_: the current and next note in a treble clef left of the circle, on
+  tablets and laptops), microphone sensitivity, one note back, calibration, and clearing saved data.
 
 ### Calibration (optional)
 

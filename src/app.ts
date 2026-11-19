@@ -7,6 +7,7 @@ import { SONGS, SONG_KEYS, type SongKey } from "./songs";
 import { OPT_DEFAULTS, clearAll, loadCal, loadOpts, saveCal, saveOpts } from "./storage";
 import { $, button, input } from "./ui/dom";
 import { highlightBar, renderInstrument, strikeBar } from "./ui/instrument";
+import { renderStaff } from "./ui/staff";
 import { sparkle } from "./ui/sparkle";
 
 type Mode = "home" | "play";
@@ -86,7 +87,7 @@ function stopSong(): boolean {
 
 function setMode(m: Mode): void {
   mode = m;
-  document.body.className = m;
+  document.body.className = m + (opts.staff ? " notation" : "");
   $("title").textContent = m === "home" ? "🎵 Mein Glockenspiel" : `${song().icon} ${song().title}`;
 }
 
@@ -148,6 +149,7 @@ function show(): void {
     $("syl").style.display = "block";
     showBar(n);
     highlightBar($("instrument"), n);
+    renderStaff($("staff"), n, null);
     $("colname").textContent = COL[n].name + (highTwin(n) ? " links" : "");
     $("syl").textContent = `Kalibrieren ${calIdx + 1}/${ORDER.length}`;
     $("hint").textContent = "Schlag diesen Stab einzeln an (Kreis antippen = überspringen)";
@@ -163,6 +165,7 @@ function show(): void {
   $("syl").style.display = x ? "block" : "none";
   dots.forEach((d, i) => (d.className = "dot" + (i < idx ? " done" : "") + (i === idx ? " cur" : "")));
   highlightBar($("instrument"), x ? x.n : null);
+  renderStaff($("staff"), x ? x.n : null, notes[idx + 1]?.n ?? null);
   if (!x) {
     $("hint").textContent = "";
     $("next").innerHTML = "";
@@ -352,6 +355,7 @@ function openSettings(): void {
   $("setMsg").textContent = "";
   input("optAuto").checked = opts.auto;
   input("optSpeak").checked = opts.speak;
+  input("optStaff").checked = opts.staff;
   updateCalUI();
   $<HTMLDialogElement>("settings").showModal();
 }
@@ -462,6 +466,11 @@ function wire(): void {
     opts.speak = input("optSpeak").checked;
     saveOpts(opts);
   };
+  input("optStaff").onchange = () => {
+    opts.staff = input("optStaff").checked;
+    saveOpts(opts);
+    document.body.classList.toggle("notation", opts.staff);
+  };
   button("calreset").onclick = () => {
     cal = null;
     saveCal(cal);
@@ -474,6 +483,8 @@ function wire(): void {
     opts = { ...OPT_DEFAULTS };
     input("optAuto").checked = opts.auto;
     input("optSpeak").checked = opts.speak;
+    input("optStaff").checked = opts.staff;
+    document.body.classList.toggle("notation", opts.staff);
     updateCalUI();
     $("setMsg").textContent = "Alle gespeicherten Daten gelöscht.";
   };

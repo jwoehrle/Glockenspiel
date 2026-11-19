@@ -11,9 +11,11 @@ export interface Options {
   auto: boolean;
   /** Read the color aloud. */
   speak: boolean;
+  /** Show the current note in staff notation next to the circle. */
+  staff: boolean;
 }
 
-export const OPT_DEFAULTS: Readonly<Options> = { auto: false, speak: false };
+export const OPT_DEFAULTS: Readonly<Options> = { auto: false, speak: false, staff: false };
 
 // localStorage can throw (private mode, quota, disabled storage); the app must keep working without it.
 
@@ -41,6 +43,7 @@ export function loadOpts(): Options {
     return {
       auto: typeof r.auto === "boolean" ? r.auto : OPT_DEFAULTS.auto,
       speak: typeof r.speak === "boolean" ? r.speak : OPT_DEFAULTS.speak,
+      staff: typeof r.staff === "boolean" ? r.staff : OPT_DEFAULTS.staff,
     };
   } catch {
     return { ...OPT_DEFAULTS };

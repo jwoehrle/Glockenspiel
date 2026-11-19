@@ -78,6 +78,11 @@ Stop dev/preview servers when done.
   `style.css`: tablet portrait (portrait, ≥ 700 × 800 px) shows it below the circle; landscape ≥ 900 × 600 px
   (laptops, tablet landscape) uses a grid with the circle column left and the glockenspiel right, track and controls
   below, without scrolling at 1280 × 640. Hidden on phones (portrait and landscape) and on the finish screen.
+- `src/ui/staff.ts`: staff notation (treble clef, C major, no accidentals). `staffStep` (C = c'' = step 7 ... f = f''' = step 17,
+  written an octave below the sounding pitch like children's glockenspiel books), `ledgerSteps`, `renderStaff` (current note in
+  the bar's color plus the next one faded). Clef is a hand-drawn SVG path (music fonts are not reliably installed). Parent option
+  "Noten anzeigen" (`staff`, off by default) adds `notation` to `body.className`; shown left of the circle on tablet portrait and
+  landscape layouts (3-column grid), hidden on phones and the finish screen.
 - `src/ui/dom.ts`, `src/ui/sparkle.ts`, `src/style.css`.
 - `src/sw.ts`: service worker (precache, offline navigation fallback, deletes old `glock-v*` caches from the
   pre-build era). Served at `/Glockenspiel/sw.js`, the same URL as the old hand-written worker.
@@ -103,6 +108,8 @@ Stop dev/preview servers when done.
   keeps its own settings.
   - `playback.spec.ts`: ▶ with Playwright's fake clock: every note of Bruder Jakob starts on time and the circle,
     track and highlighted bar follow; stop, circle tap and 🏠 end the playback.
+  - `notation.spec.ts`: staff notation option, position left of the circle (laptops, tablets), no scrolling, hidden on phones,
+    current/next note and octave (ledger lines) follow the song.
   - `instrument.spec.ts`: glockenspiel picture on tablet portrait (highlighted bar incl. D vs. d, colors/order,
     hidden on finish screen), playing by tapping bars or the circle (tones counted via an `AudioContext` spy),
     side-by-side layout on laptops and tablet landscape (no scrolling), hidden on phones. Saves screenshots to `test-results/`.
@@ -130,7 +137,7 @@ Stop dev/preview servers when done.
   🥜 Lasst uns froh und munter sein, ❄ Jingle Bells, 🎅 Morgen kommt der Weihnachtsmann, 🎄 Alle Jahre wieder,
   👶 Ihr Kinderlein, 🔔 Kling, Glöckchen, 😴 Bruder Jakob, 🎆 Freude, schöner Götterfunken. Avoid 🔊 🎤 🏠 🔁 ⚙ 🎵 ▶ ⏹
   and the praise sparkles ⭐ ✨ 🌟.
-- Autoplay and read-aloud are options in the parent area, both **off by default**.
+- Autoplay, read-aloud and staff notation are options in the parent area, all **off by default**.
 - Playing without a real glockenspiel: tapping a bar of the on-screen glockenspiel plays its tone and is judged
   like a real strike (right bar → next note, wrong bar → wobble only). Tapping the big circle plays the current
   note and moves on. Every tone the app plays calls `mic.block()` so the microphone does not hear it. Bar taps are
