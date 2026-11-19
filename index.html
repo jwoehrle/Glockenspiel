@@ -11,8 +11,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Glockenspiel" />
-    <script type="module" crossorigin src="/Glockenspiel/assets/index-DpXQqjKt.js"></script>
-    <link rel="stylesheet" crossorigin href="/Glockenspiel/assets/index-Bj-Iij32.css">
+    <script type="module" crossorigin src="/Glockenspiel/assets/index-D2k2K21a.js"></script>
+    <link rel="stylesheet" crossorigin href="/Glockenspiel/assets/index-C7ezEJw1.css">
   <link rel="manifest" href="/Glockenspiel/manifest.webmanifest"></head>
   <body class="home">
     <button
@@ -23,11 +23,14 @@
     >
       ⚙️
     </button>
+    <div class="gearhint" id="gearhint" role="status" hidden>⚙ Zum Öffnen gedrückt halten</div>
     <h1 id="title">🎵 Mein Glockenspiel</h1>
     <div class="songs" id="songs"></div>
 
     <div class="stage">
       <div class="big" id="big" title="Antippen = weiter"></div>
+      <!-- Staff notation (parent option; left of the circle on tablets and laptops, hidden on phones) -->
+      <div class="staff idle" id="staff" role="img"></div>
       <div class="colname" id="colname"></div>
       <div class="syl" id="syl"></div>
       <!-- Whole glockenspiel with the bar to strike popping out (tablet portrait: below the circle; landscape: beside it; see style.css) -->
@@ -58,6 +61,7 @@
       <h2>⚙️ Eltern-Bereich</h2>
       <label class="opt"><input type="checkbox" id="optAuto" /> Ton automatisch vorspielen</label>
       <label class="opt"><input type="checkbox" id="optSpeak" /> Farbe vorlesen</label>
+      <label class="opt"><input type="checkbox" id="optStaff" /> Noten anzeigen</label>
       <label class="opt">Empfindlichkeit <input type="range" id="sens" min="1" max="10" value="6" /></label>
       <button id="back">⬅️ Einen Ton zurück</button>
       <button id="cal">🎯 Kalibrieren</button>
