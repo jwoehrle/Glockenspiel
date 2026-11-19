@@ -1,0 +1,128 @@
+# Test, publish the live site, and publish a preview for every pull request.
+#
+# Requires: repo Settings → Pages → Source = "Deploy from a branch", branch `gh-pages`, folder `/ (root)`.
+#
+#   push to main      → tests → live site     https://jwoehrle.github.io/Glockenspiel/
+#   pull request      → tests → preview       https://jwoehrle.github.io/Glockenspiel/pr-preview/pr-<n>/
+#                                              (link posted as a PR comment, updated on every push)
+#   pull request closed/merged → preview removed
+#
+# Both live in the gh-pages branch: the live site at the root, previews in pr-preview/.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: test-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Type-check, lint, format, unit tests
+        run: npm run check
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end tests (production build under /Glockenspiel/)
+        run: npm run test:e2e
+      - name: End-to-end tests of the gh-pages layout (live site + preview on one origin)
+        run: npm run test:e2e:preview
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-reports
+          path: |
+            playwright-report
+            playwright-report-preview
+          retention-days: 7
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # One writer to gh-pages at a time (live deploys and previews).
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
+          # Keep the pull-request previews when replacing the live site.
+          clean-exclude: pr-preview/
+
+  preview:
+    # Previews need write access, which pull requests from forks don't get.
+    if: >-
+      github.event_name == 'pull_request' && github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build the preview under its own path
+        run: npm run build
+        env:
+          BASE_PATH: /Glockenspiel/pr-preview/pr-${{ github.event.number }}/
+          VITE_PREVIEW: PR ${{ github.event.number }}
+      - uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: dist
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: deploy
+
+  preview-cleanup:
+    if: >-
+      github.event_name == 'pull_request' && github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rossjrw/pr-preview-action@v1
+        with:
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: remove
